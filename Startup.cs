@@ -1,5 +1,4 @@
 using SMIXKTBConvenienceCheque.Configurations;
-using SMIXKTBConvenienceCheque.Data;
 using SMIXKTBConvenienceCheque.Helpers;
 using SMIXKTBConvenienceCheque.Middlewares;
 using SMIXKTBConvenienceCheque.Startups;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Prometheus;
+using SMIXKTBConvenienceCheque.Data;
 
 namespace SMIXKTBConvenienceCheque
 {

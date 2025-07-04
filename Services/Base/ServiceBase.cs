@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using SMIXKTBConvenienceCheque.Data;
 using SMIXKTBConvenienceCheque.DTOs;
 using SMIXKTBConvenienceCheque.Helpers;
 using SMIXKTBConvenienceCheque.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using SMIXKTBConvenienceCheque.Data;
 
 namespace SMIXKTBConvenienceCheque.Services
 {

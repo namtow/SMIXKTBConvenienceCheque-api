@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using SMIXKTBConvenienceCheque.Models;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace SMIXKTBConvenienceCheque.Data
 {
@@ -26,15 +24,6 @@ namespace SMIXKTBConvenienceCheque.Data
         public virtual DbSet<BatchHeader> BatchHeaders { get; set; }
         public virtual DbSet<Detail> Details { get; set; }
         public virtual DbSet<TmpImportClaim> TmpImportClaims { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Data Source=147.50.150.227;Initial Catalog=SMIXKTBCheque;Persist Security Info=True;User ID=devdba;Password=-v300wfhxt");
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

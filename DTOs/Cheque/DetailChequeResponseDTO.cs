@@ -1,4 +1,6 @@
-﻿namespace SMIXKTBConvenienceCheque.DTOs.Cheque
+﻿#nullable disable
+
+namespace SMIXKTBConvenienceCheque.DTOs.Cheque
 {
     public class DetailChequeResponseDTO
     {

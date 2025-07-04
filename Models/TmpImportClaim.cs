@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace DemoPOS.Models
+namespace SMIXKTBConvenienceCheque.Models
 {
     [Keyless]
     [Table("TmpImportClaim")]

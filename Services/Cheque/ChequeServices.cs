@@ -1,10 +1,14 @@
-﻿using Serilog;
-using SMIXKTBConvenienceCheque.Data;
+﻿using SMIXKTBConvenienceCheque.Data;
+using Serilog;
 using SMIXKTBConvenienceCheque.DTOs.Cheque;
 using SMIXKTBConvenienceCheque.Models;
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
+using System;
+using System.Linq.Dynamic.Core;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Quartz.Core;
 
 namespace SMIXKTBConvenienceCheque.Services.Cheque
 {
@@ -26,6 +30,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
             {
                 //PadRight >> เติมช่องว่างทางขวา
                 //PadRight >> เติมช่องว่างทางซ้าย
+                var batchNoGen = Guid.NewGuid().ToString().Substring(0, 20);
                 //Header data
                 var header = new HeaderChequeResponseDTO
                 {
@@ -40,12 +45,12 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     PayerTaxID = "0107555000538".PadRight(15),
                     PayerSocialSecurity = "107555000538".PadRight(15),
                     EffectiveDate = "07072025".PadRight(8),//DateTime.Now.ToString("dd/MM/yyyy")
-                    BatchNo = "HT00012376945".PadRight(35),
+                    BatchNo = batchNoGen.PadRight(35),
                     BankReference = "".PadRight(25),
                     KTB = "".PadRight(5),
                     Filler = "".PadRight(1049),
-                    CarriageReturn = "".PadRight(1),
-                    EndofLine = "".PadRight(1)
+                    //CarriageReturn = "".PadRight(1),
+                    //EndofLine = "".PadRight(1)
                 };
 
                 var propsHeaader = header.GetType()
@@ -54,21 +59,23 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
                 var stringHeader = string.Concat(propsHeaader.Select(p => p.GetValue(header)?.ToString() ?? ""));
 
+                var tmpDetail = await _dBContext.TmpImportClaims.Where(x => x.fileNo == 1).Take(10).OrderBy(a => a.ApplicationCode).ThenBy(a => a.seqNo).ToListAsync();
+
                 //Detail data
-                var detail = new DetailChequeResponseDTO
+                var details = tmpDetail.Select(d => new DetailChequeResponseDTO
                 {
                     RecordType = "D".PadRight(1),
-                    PaymentRefNo1 = "1500002604".PadRight(20),
+                    PaymentRefNo1 = $"{d.ApplicationCode}0000{d.seqNo.ToString()}".PadRight(20),
                     PaymentReferenceNo2 = "".PadRight(20),
                     PaymentReferenceNo3 = "".PadRight(20),
                     SupplierReferenceNo = "".PadRight(15),
                     PayType = "C".PadRight(1),
-                    PayeeName = "นายปีเตอร์ นั่นนายหรอ".PadRight(100),
-                    PayeeIdCardNo = "3828473644112".PadRight(15),
-                    PayeeAddress1 = "89/8 ถนน เฉลิมพงษ์ แขวง สายไหม เขต สายไหม กรุงเทพมหานคร".PadRight(70),
+                    PayeeName = d.CustName.PadRight(100),
+                    PayeeIdCardNo = "".PadRight(15),
+                    PayeeAddress1 = "-".PadRight(70),
                     PayeeAddress2 = "-".PadRight(70), //ถ้าไม่มี fix (-)
                     PayeeAddress3 = "".PadRight(70),
-                    PostCode = "10220".PadRight(5),
+                    PostCode = d.ZipCode.PadRight(5),
                     PayeeBankCode = "".PadRight(3),
                     PayeeBankACNo = "".PadRight(20),
                     EffectiveDate = "07072025".PadRight(8),
@@ -79,16 +86,16 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     TotalWHTAmount = "".PadLeft(20),
                     TotalTaxableAmount = "".PadLeft(20),
                     TotalDiscountAmount = "".PadLeft(20),
-                    NetChequeTrAmount = "1,250.75".PadLeft(20),
-
+                    NetChequeTrAmount = d.PayTotal == null ? "".PadLeft(20)
+                                                            : d.PayTotal.Value.ToString("#,##0.00", CultureInfo.InvariantCulture).PadLeft(20),
                     DeliveryMethod = "CR".PadRight(2),
                     PickupchequeLocation = "700".PadRight(15),
                     ChequeNumber = "".PadRight(10),
                     ChequeStatus = "".PadRight(5),
                     ChequeStatusDate = "".PadRight(8),
-                    NotificationMethod = "E".PadRight(1),
-                    MobileNumber = "0612858491".PadRight(20),
-                    EmailAddress = "nutt.b@gmail.com".PadRight(70),
+                    NotificationMethod = "".PadRight(1),
+                    MobileNumber = "".PadRight(20),
+                    EmailAddress = "".PadRight(70),
                     FAXNumber = "".PadRight(20),
                     DateReturnChequetoCompany = "".PadRight(8),
                     ReturnChequeMethod = "".PadRight(3),
@@ -100,33 +107,45 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     KTBRef = "".PadRight(30),
                     ForKTBSystem = "".PadRight(151),
                     FreeFiller = "".PadRight(350),
-                    CarriageReturn = "".PadRight(1),
-                    EndofLine = "".PadRight(1),
-                };
-                var propsdetail = detail.GetType()
-                      .GetProperties()
-                      .OrderBy(p => p.MetadataToken); // รักษาลำดับฟิลด์ตามประกาศ
+                    //CarriageReturn = "".PadRight(1),
+                    //EndofLine = "".PadRight(1),
+                }).ToList();
 
-                var stringdetail = string.Concat(propsdetail.Select(p => p.GetValue(detail)?.ToString() ?? ""));
+                List<string> stringdetail = new();
 
-                var amount = 23980;
-                var format = amount.ToString("#,##0.00", CultureInfo.InvariantCulture);
+                foreach (var d in details)
+                {
+                    var propsdetail = d.GetType()
+                          .GetProperties()
+                          .OrderBy(p => p.MetadataToken); // รักษาลำดับฟิลด์ตามประกาศ
+
+                    var detailLine = string.Concat(propsdetail.Select(p => p.GetValue(d)));
+
+                    stringdetail.Add(detailLine);
+                }
+
+                //var amount = 23980;
+                //var format = amount.ToString("#,##0.00", CultureInfo.InvariantCulture);
+                var amountTotal = tmpDetail.Sum(t => t.PayTotal);
+                var amountPayment = amountTotal == null ? "0.00" : amountTotal.Value.ToString("#,##0.00", CultureInfo.InvariantCulture);
+                var count = tmpDetail.Count.ToString();
+
                 //Trailer
                 var trailer = new TrailerChequeResponseDTO
                 {
                     RecordType = "T".PadRight(1),
-                    BatchNo = "HT00012376945".PadRight(35),
-                    TotalPaymentRecord = "9".PadLeft(15), //record ต้องชิดขวา
-                    TotalPaymentAmount = "20,000.15".PadLeft(20),
-                    TotalWHTRecord = "6".PadLeft(15),
-                    TotalWHTAmount = "300.00".PadLeft(20),
-                    TotalInvoiceRecord = "7".PadLeft(15),
-                    TotalInvoiceNetAmount = "5,477.67".PadLeft(20),
+                    BatchNo = batchNoGen.PadRight(35),
+                    TotalPaymentRecord = count.PadLeft(15), //record ต้องชิดขวา
+                    TotalPaymentAmount = amountPayment.PadLeft(20),
+                    TotalWHTRecord = "0".PadLeft(15),
+                    TotalWHTAmount = "0.00".PadLeft(20),
+                    TotalInvoiceRecord = "0".PadLeft(15),
+                    TotalInvoiceNetAmount = "00.00".PadLeft(20),
                     TotalMailRecord = "0".PadLeft(15),
                     FileBatchNoBankReference = "0".PadRight(25),
                     Filler = "0".PadRight(1317),
-                    CarriageReturn = "".PadRight(1),
-                    EndofLine = "".PadRight(1),
+                    //CarriageReturn = "".PadRight(1),
+                    //EndofLine = "".PadRight(1),
                 };
                 var propstrailer = trailer.GetType()
                       .GetProperties()
@@ -134,15 +153,21 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
                 var stringTrailer = string.Concat(propstrailer.Select(p => p.GetValue(trailer)?.ToString() ?? ""));
 
-                var finalList = new List<string> { stringHeader, stringdetail, stringTrailer };
+                //var finalList = new List<string> { stringHeader, stringdetail, stringTrailer };
+
+                var finalList = new List<string> { stringHeader };
+                finalList.AddRange(stringdetail);
+                finalList.Add(stringTrailer);
+
+                var resultBytes = CreateTextFile(finalList);
 
                 var dataOut = new FileResponseDTO
                 {
                     //todo: db
-                    Data = CreateTextFile(finalList),
+                    Data = resultBytes,
                     IsResult = true,
                     Message = "Success",
-                    FileName = "KTBChuqueSMI"
+                    FileName = "SSIN EX_Kcorp_ConChq.txt"
                 };
 
                 return ResponseResult.Success(dataOut);
@@ -155,13 +180,13 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
         #region Function
 
-        //public byte[] CreateTextFile(string fileName, List<string> data)
+        //public byte[] CreateTextFile(List<string> data)
         //{
         //    var methodName = nameof(CreateTextFile);
         //    //create list string to create file text
         //    //List<string> listDataFiles = new List<string>();
 
-        //    _logger.Debug("[{FunctionName}] - Add data :{@fileName} to list", methodName, fileName);
+        //    _logger.Debug("[{FunctionName}] - Add data :{@fileName} to list", methodName);
         //    // Add the mapped data to the list IS
         //    //foreach (var dto in data)
         //    //{
@@ -169,7 +194,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
         //    //    listDataFiles.Add(dto.XMLDetail.ToString());
         //    //}
 
-        //    var localPathFile = $"D:\\Documents\\{fileName}.txt";
+        //    var localPathFile = $"D:\\Documents\\test01.txt";
 
         //    // Create a UTF-8 encoding object with BOM
         //    Encoding utf8EncodingWithBom = new UTF8Encoding(true);
@@ -186,6 +211,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
         //    return a;
         //}
+
         public byte[] CreateTextFile(List<string> lines)
         {
             var methodName = nameof(CreateTextFile);
@@ -202,10 +228,30 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
             {
                 writer.WriteLine(line);
             }
-
-            writer.Flush(); // Ensure all data is written to the stream
+            writer.Dispose();
+            //writer.Flush(); // Ensure all data is written to the stream
             return memoryStream.ToArray(); // Return byte[] directly
         }
+
+        //public byte[] CreateTextFile(List<string> lines)
+        //{
+        //    var methodName = nameof(CreateTextFile);
+        //    _logger.Debug("[{FunctionName}] - Generating file text", methodName);
+
+        //    var encoding = Encoding.GetEncoding(874); // TIS-620 (Windows-874)
+
+        //    using var memoryStream = new MemoryStream();
+        //    using (var writer = new StreamWriter($"D:\\Documents\\TEST0001.txt", false, encoding))
+        //    {
+        //        foreach (var line in lines)
+        //        {
+        //            writer.WriteLine(line);
+        //        }
+        //        writer.Flush(); // สำคัญมาก: ต้อง flush ก่อนอ่านจาก memoryStream
+        //    }
+
+        //    return memoryStream.ToArray(); // ส่งออกเป็น byte[]
+        //}
 
         #endregion Function
     }

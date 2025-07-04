@@ -17,7 +17,7 @@ namespace SMIXKTBConvenienceCheque.Controllers.Cheque
         [HttpGet("download")]
         public async Task<IActionResult> CreateFileCheque()
         {
-            string contentType = "text/plain"; //MIME type สำหรับไฟล์ .txt
+            string contentType = "application/octet-stream"; //MIME type สำหรับไฟล์ .txt
             var fileText = await _services.CreateFileCheque();
 
             if (fileText.Data != null)

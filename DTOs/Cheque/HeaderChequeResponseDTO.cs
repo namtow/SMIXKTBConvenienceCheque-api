@@ -1,4 +1,6 @@
-﻿using Confluent.Kafka;
+﻿#nullable disable
+
+using Confluent.Kafka;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 
