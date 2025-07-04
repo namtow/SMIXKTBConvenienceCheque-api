@@ -6,6 +6,7 @@ using SMIXKTBConvenienceCheque.Services.Auth;
 using SMIXKTBConvenienceCheque.Startups;
 using MassTransit.ExtensionsDependencyInjectionIntegration;
 using Quartz;
+using SMIXKTBConvenienceCheque.Services.Cheque;
 
 namespace SMIXKTBConvenienceCheque
 {
@@ -20,13 +21,12 @@ namespace SMIXKTBConvenienceCheque
 
             // ใช้สำหรับข้อมูล Login
             services.AddScoped<ILoginDetailServices, LoginDetailServices>();
-
+            services.AddScoped<IChequeServices, ChequeServices>();
             // TODO: เมื่อเขียน Service และ Interface ของ Service ให้ใส่ที่นี้
             // services.AddSingleton // ใช้เมื่อใช้ Instance เดียวทั้ง Project
             // services.AddScoped // ใช้เมื่อแยก Instance ตาม User
             // services.AddTransient // ใช้เมื่อสร้าง Instance ใหม่ทุกครั้งที่เรียกใช้
             // services.AddScoped<IProductService, ProductService>();
-          
 
             // TODO: ตัวอย่างการเขียน RestSharp หากไม่ใช้ให้ลบ Folder Examples ทิ้ง
             // วิธีการเขียน RestSharp

@@ -56,7 +56,6 @@
 	<ItemGroup>
 		<Folder Include="Clients\" />
 		<Folder Include="Consumers\" />
-		<Folder Include="Controllers\" />
 		<Folder Include="Logs\" />
 		<Folder Include="Migrations\" />
 		<Folder Include="Models\Partials\" />
