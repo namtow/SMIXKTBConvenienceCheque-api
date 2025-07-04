@@ -20,5 +20,159 @@ namespace SMIXKTBConvenienceCheque.Data
             : base(options)
         {
         }
+
+        public virtual DbSet<BatchControl> BatchControls { get; set; }
+        public virtual DbSet<BatchDetail> BatchDetails { get; set; }
+        public virtual DbSet<BatchHeader> BatchHeaders { get; set; }
+        public virtual DbSet<Detail> Details { get; set; }
+        public virtual DbSet<TmpImportClaim> TmpImportClaims { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Data Source=147.50.150.227;Initial Catalog=SMIXKTBCheque;Persist Security Info=True;User ID=devdba;Password=-v300wfhxt");
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.UseCollation("Thai_100_CI_AI");
+
+            modelBuilder.Entity<BatchDetail>(entity =>
+            {
+                entity.Property(e => e.AccountPayeeOnlyFlag).IsFixedLength();
+
+                entity.Property(e => e.AcknowledgementDocumentNotify).IsFixedLength();
+
+                entity.Property(e => e.BatchNo).IsFixedLength();
+
+                entity.Property(e => e.CarriageReturn).IsFixedLength();
+
+                entity.Property(e => e.ChequeNumber).IsFixedLength();
+
+                entity.Property(e => e.ChequeStatus).IsFixedLength();
+
+                entity.Property(e => e.ChequeStatusDate).IsFixedLength();
+
+                entity.Property(e => e.DateReturnChequeToCompany).IsFixedLength();
+
+                entity.Property(e => e.DeliveryMethod).IsFixedLength();
+
+                entity.Property(e => e.EffectiveDate).IsFixedLength();
+
+                entity.Property(e => e.EmailAddress).IsFixedLength();
+
+                entity.Property(e => e.EndOfLine).IsFixedLength();
+
+                entity.Property(e => e.FaxNumber).IsFixedLength();
+
+                entity.Property(e => e.FileBatchNoBankReference).IsFixedLength();
+
+                entity.Property(e => e.FileBatchReference).IsFixedLength();
+
+                entity.Property(e => e.Filler).IsFixedLength();
+
+                entity.Property(e => e.ForKTBSystem).IsFixedLength();
+
+                entity.Property(e => e.FreeFiller).IsFixedLength();
+
+                entity.Property(e => e.InvoiceAmount).IsFixedLength();
+
+                entity.Property(e => e.KTBRef).IsFixedLength();
+
+                entity.Property(e => e.MobileNumber).IsFixedLength();
+
+                entity.Property(e => e.NetChequeTransferAmount).IsFixedLength();
+
+                entity.Property(e => e.NotificationMethod).IsFixedLength();
+
+                entity.Property(e => e.PayType).IsFixedLength();
+
+                entity.Property(e => e.PayeeAddress1).IsFixedLength();
+
+                entity.Property(e => e.PayeeAddress2).IsFixedLength();
+
+                entity.Property(e => e.PayeeAddress3).IsFixedLength();
+
+                entity.Property(e => e.PayeeBankAccountNo).IsFixedLength();
+
+                entity.Property(e => e.PayeeBankCode).IsFixedLength();
+
+                entity.Property(e => e.PayeeIdCardNo).IsFixedLength();
+
+                entity.Property(e => e.PayeeName).IsFixedLength();
+
+                entity.Property(e => e.PayerAbbreviation).IsFixedLength();
+
+                entity.Property(e => e.PayerAccountNo).IsFixedLength();
+
+                entity.Property(e => e.PayerAddress1).IsFixedLength();
+
+                entity.Property(e => e.PayerAddress2).IsFixedLength();
+
+                entity.Property(e => e.PayerAddress3).IsFixedLength();
+
+                entity.Property(e => e.PayerName).IsFixedLength();
+
+                entity.Property(e => e.PayerSocialSecurity).IsFixedLength();
+
+                entity.Property(e => e.PayerTaxID).IsFixedLength();
+
+                entity.Property(e => e.PaymentRefNo1).IsFixedLength();
+
+                entity.Property(e => e.PaymentRefNo2).IsFixedLength();
+
+                entity.Property(e => e.PaymentRefNo3).IsFixedLength();
+
+                entity.Property(e => e.PickUpChequeLocation).IsFixedLength();
+
+                entity.Property(e => e.PostCode).IsFixedLength();
+
+                entity.Property(e => e.PostCodeD).IsFixedLength();
+
+                entity.Property(e => e.PrintLocation).IsFixedLength();
+
+                entity.Property(e => e.RecordType).IsFixedLength();
+
+                entity.Property(e => e.ReturnChequeMethod).IsFixedLength();
+
+                entity.Property(e => e.StrikethroughFlag).IsFixedLength();
+
+                entity.Property(e => e.SupplierRefNo).IsFixedLength();
+
+                entity.Property(e => e.TotalDiscountAmount).IsFixedLength();
+
+                entity.Property(e => e.TotalInvoiceNetAmount).IsFixedLength();
+
+                entity.Property(e => e.TotalInvoiceRecord).IsFixedLength();
+
+                entity.Property(e => e.TotalMailRecord).IsFixedLength();
+
+                entity.Property(e => e.TotalPaymentAmount).IsFixedLength();
+
+                entity.Property(e => e.TotalPaymentRecord).IsFixedLength();
+
+                entity.Property(e => e.TotalTaxableAmount).IsFixedLength();
+
+                entity.Property(e => e.TotalVATAmount).IsFixedLength();
+
+                entity.Property(e => e.TotalWHTAmount).IsFixedLength();
+
+                entity.Property(e => e.TotalWHTRecord).IsFixedLength();
+
+                entity.Property(e => e.VATPercent).IsFixedLength();
+            });
+
+            modelBuilder.Entity<Detail>(entity =>
+            {
+                entity.Property(e => e.Prefix).IsFixedLength();
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
