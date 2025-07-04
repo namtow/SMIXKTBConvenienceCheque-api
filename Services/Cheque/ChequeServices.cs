@@ -2,6 +2,7 @@
 using SMIXKTBConvenienceCheque.Data;
 using SMIXKTBConvenienceCheque.DTOs.Cheque;
 using SMIXKTBConvenienceCheque.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Text;
 
@@ -35,17 +36,18 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     PayerAddress2 = "".PadRight(70),
                     PayerAddress3 = "".PadRight(70),
                     PostCode = "12130".PadRight(5),
-                    PayerACNo = "1234567890".PadRight(20),
-                    PayerTaxID = "107555000538".PadRight(15),
-                    PayerSocialSecurity = "".PadRight(15),
+                    PayerACNo = "1526007770".PadRight(20),
+                    PayerTaxID = "0107555000538".PadRight(15),
+                    PayerSocialSecurity = "107555000538".PadRight(15),
                     EffectiveDate = "07072025".PadRight(8),//DateTime.Now.ToString("dd/MM/yyyy")
-                    BatchNo = "batch00000000000012345678095647462".PadRight(35),
+                    BatchNo = "HT00012376945".PadRight(35),
                     BankReference = "".PadRight(25),
                     KTB = "".PadRight(5),
                     Filler = "".PadRight(1049),
                     CarriageReturn = "".PadRight(1),
                     EndofLine = "".PadRight(1)
                 };
+
                 var propsHeaader = header.GetType()
                        .GetProperties()
                        .OrderBy(p => p.MetadataToken); // รักษาลำดับฟิลด์ตามประกาศ
@@ -56,14 +58,14 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 var detail = new DetailChequeResponseDTO
                 {
                     RecordType = "D".PadRight(1),
-                    PaymentRefNo1 = "99999999999999999999".PadRight(20),
+                    PaymentRefNo1 = "1500002604".PadRight(20),
                     PaymentReferenceNo2 = "".PadRight(20),
                     PaymentReferenceNo3 = "".PadRight(20),
                     SupplierReferenceNo = "".PadRight(15),
                     PayType = "C".PadRight(1),
-                    PayeeName = "คุณปีเตอร์ นั่นนายหรอ".PadRight(100),
+                    PayeeName = "นายปีเตอร์ นั่นนายหรอ".PadRight(100),
                     PayeeIdCardNo = "3828473644112".PadRight(15),
-                    PayeeAddress1 = "89/8 ถนน เฉลิมพงษ์ แขวง สายไหม เขต สายไหม กรุงเทพมหานคร ".PadRight(70),
+                    PayeeAddress1 = "89/8 ถนน เฉลิมพงษ์ แขวง สายไหม เขต สายไหม กรุงเทพมหานคร".PadRight(70),
                     PayeeAddress2 = "-".PadRight(70), //ถ้าไม่มี fix (-)
                     PayeeAddress3 = "".PadRight(70),
                     PostCode = "10220".PadRight(5),
@@ -119,12 +121,12 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     TotalWHTRecord = "6".PadLeft(15),
                     TotalWHTAmount = "300.00".PadLeft(20),
                     TotalInvoiceRecord = "7".PadLeft(15),
-                    TotalInvoiceNetAmount = "5477.67".PadLeft(20),
+                    TotalInvoiceNetAmount = "5,477.67".PadLeft(20),
                     TotalMailRecord = "0".PadLeft(15),
                     FileBatchNoBankReference = "0".PadRight(25),
                     Filler = "0".PadRight(1317),
-                    CarriageReturn = "0".PadRight(1),
-                    EndofLine = "0".PadRight(1),
+                    CarriageReturn = "".PadRight(1),
+                    EndofLine = "".PadRight(1),
                 };
                 var propstrailer = trailer.GetType()
                       .GetProperties()
@@ -189,8 +191,9 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
             var methodName = nameof(CreateTextFile);
             _logger.Debug("[{FunctionName}] - Generating file text", methodName);
             // Create a UTF-8 encoding object with BOM
-            var encoding = new UTF8Encoding(true);
+            //var encoding = new UTF8Encoding(true);
             //var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true); // UTF-8 with BOM อ่่านไทยถูกต้องไม่เพี้ยน
+            var encoding = Encoding.GetEncoding(874); // หรือ "windows-874"
 
             using var memoryStream = new MemoryStream();
             using var writer = new StreamWriter(memoryStream, encoding);
