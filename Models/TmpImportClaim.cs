@@ -54,5 +54,6 @@ namespace SMIXKTBConvenienceCheque.Models
         public string ZipCode { get; set; }
         public int? fileNo { get; set; }
         public int? seqNo { get; set; }
+        public int? batchNo { get; set; }
     }
 }
