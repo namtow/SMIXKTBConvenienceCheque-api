@@ -25,5 +25,9 @@ namespace SMIXKTBConvenienceCheque.Models
         public int? CreatedByUserId { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
+
+        [ForeignKey("BatchControlId")]
+        [InverseProperty("BatchHeaders")]
+        public virtual BatchControl BatchControl { get; set; }
     }
 }

@@ -17,105 +17,192 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(1)]
         [Unicode(false)]
         public string RecordType { get; set; }
+        /// <summary>
+        /// ชื่อย่อบริษัท  หรือ  Company Code
+        /// </summary>
         [StringLength(10)]
         [Unicode(false)]
         public string PayerAbbreviation { get; set; }
+        /// <summary>
+        /// ชื่อบริษัทผู้สั่งจ่ายเช็ค
+        /// </summary>
         [StringLength(100)]
         [Unicode(false)]
         public string PayerName { get; set; }
+        /// <summary>
+        /// ที่อยู่ผู้ชำระเงิน 1
+        /// </summary>
         [StringLength(70)]
         [Unicode(false)]
         public string PayerAddress1 { get; set; }
+        /// <summary>
+        /// ที่อยู่ผู้ชำระเงิน 2
+        /// </summary>
         [StringLength(70)]
         [Unicode(false)]
         public string PayerAddress2 { get; set; }
+        /// <summary>
+        /// ที่อยู่ผู้ชำระเงิน 3
+        /// </summary>
         [StringLength(70)]
         [Unicode(false)]
         public string PayerAddress3 { get; set; }
+        /// <summary>
+        /// รหัสไปรษณีย์
+        /// </summary>
         [StringLength(5)]
         [Unicode(false)]
         public string PostCode { get; set; }
+        /// <summary>
+        /// หมายเลขบัญชีของบริษัทผู้สั่งจ่ายเช็ค
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string PayerAccountNo { get; set; }
+        /// <summary>
+        /// หมายเลขประจำตัวผู้เสียภาษีของบริษัทผู้สั่งจ่ายเช็ค
+        /// </summary>
         [StringLength(15)]
         [Unicode(false)]
         public string PayerTaxID { get; set; }
+        /// <summary>
+        /// หมายเลขประกันสังคมของบริษัทผู้สั่งจ่ายเช็ค
+        /// </summary>
         [StringLength(15)]
         [Unicode(false)]
         public string PayerSocialSecurity { get; set; }
+        /// <summary>
+        /// วันที่บนหน้าเช็ค
+        /// </summary>
         [StringLength(8)]
         [Unicode(false)]
         public string EffectiveDate { get; set; }
+        /// <summary>
+        /// ref เชื่อม Header กับ Trailer 
+        /// </summary>
         [StringLength(35)]
         [Unicode(false)]
         public string BatchNo { get; set; }
-        [StringLength(25)]
-        [Unicode(false)]
-        public string FileBatchNoBankReference { get; set; }
+        /// <summary>
+        /// รหัสอ้างอิงในการชำระเงินใช้เชื่อมความสัมพันธ์ของข้อมูลในแต่ละ Record Type เข้าด้วยกัน
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string PaymentRefNo1 { get; set; }
+        /// <summary>
+        /// เลขที่อ้างอิงในการจ่ายเงิน 2
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string PaymentRefNo2 { get; set; }
+        /// <summary>
+        /// เลขที่อ้างอิงในการจ่ายเงิน 3
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string PaymentRefNo3 { get; set; }
+        /// <summary>
+        /// รหัสอ้างอิงของ Supplier เพื่อใช้จัดกลุ่มข้อมูลกรณีรับเช็คมากกว่า 1 ฉบับ
+        /// </summary>
         [StringLength(15)]
         [Unicode(false)]
         public string SupplierRefNo { get; set; }
+        /// <summary>
+        /// C = Cashier’s Cheque
+        /// </summary>
         [StringLength(1)]
         [Unicode(false)]
         public string PayType { get; set; }
+        /// <summary>
+        /// Beneficiary Name ใช้พิมพ์บนหน้าเช็ค
+        /// </summary>
         [StringLength(100)]
         [Unicode(false)]
         public string PayeeName { get; set; }
+        /// <summary>
+        /// เอกสารแสดงตนของ Beneficiary
+        /// </summary>
         [StringLength(15)]
         [Unicode(false)]
         public string PayeeIdCardNo { get; set; }
+        /// <summary>
+        /// ที่อยู่ผู้รับเงิน ( ถ้าไม่มีข้อมูลให้ใส่ - )
+        /// </summary>
         [StringLength(70)]
         [Unicode(false)]
         public string PayeeAddress1 { get; set; }
+        /// <summary>
+        /// ที่อยู่ผู้รับเงิน ( ถ้าไม่มีข้อมูลให้ใส่ - )
+        /// </summary>
         [StringLength(70)]
         [Unicode(false)]
         public string PayeeAddress2 { get; set; }
+        /// <summary>
+        /// ที่อยู่ผู้รับเงิน
+        /// </summary>
         [StringLength(70)]
         [Unicode(false)]
         public string PayeeAddress3 { get; set; }
-        [StringLength(5)]
-        [Unicode(false)]
-        public string PostCodeD { get; set; }
+        /// <summary>
+        /// รหัสธนาคารของผู้รับเงิน
+        /// </summary>
         [StringLength(3)]
         [Unicode(false)]
         public string PayeeBankCode { get; set; }
+        /// <summary>
+        /// หมายเลขบัญชีเงินฝากธนาคารของผู้รับเงิน
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string PayeeBankAccountNo { get; set; }
+        /// <summary>
+        /// จำนวนเงินรวมของ Invoice
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string InvoiceAmount { get; set; }
+        /// <summary>
+        /// จำนวนเงินรวมของ Invoice
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string TotalVATAmount { get; set; }
+        /// <summary>
+        /// จำนวนเงินภาษีมูลค่าเพิ่ม
+        /// </summary>
         [StringLength(5)]
         [Unicode(false)]
         public string VATPercent { get; set; }
+        /// <summary>
+        /// จำนวนเงินรวมของภาษีหัก ณ ที่จ่ายของ
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string TotalWHTAmount { get; set; }
+        /// <summary>
+        /// จำนวนเงินรวมที่ใช้ในการคำนวณภาษีหัก ณ ที่จ่ายต่อเช็ค 1 ฉบับ
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string TotalTaxableAmount { get; set; }
+        /// <summary>
+        /// จำนวนเงินรวมของส่วนลดการค้า
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string TotalDiscountAmount { get; set; }
+        /// <summary>
+        /// จำนวนเงินสุทธิที่ต้องการให้พิมพ์บนเช็ค โดยทั่;ไปมีค่าเท่ากับ net invoice amount
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string NetChequeTransferAmount { get; set; }
         [StringLength(2)]
         [Unicode(false)]
         public string DeliveryMethod { get; set; }
+        /// <summary>
+        /// สถานที่พิมพ์เช็ค / รับเช็ค ใส่รหัสสาขา หรือรหัสศูนย์เช็ค
+        /// </summary>
         [StringLength(15)]
         [Unicode(false)]
         public string PickUpChequeLocation { get; set; }
@@ -137,12 +224,21 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(70)]
         [Unicode(false)]
         public string EmailAddress { get; set; }
+        /// <summary>
+        /// หมายเลขโทรสารของผู้รับเช้ค
+        /// </summary>
         [StringLength(20)]
         [Unicode(false)]
         public string FaxNumber { get; set; }
+        /// <summary>
+        /// วันที่ธนาคารจะเก็บรักษาตัวเช็คไว้ 
+        /// </summary>
         [StringLength(8)]
         [Unicode(false)]
         public string DateReturnChequeToCompany { get; set; }
+        /// <summary>
+        /// วิธีการดำเนินการเมื่อถึงวัน Date Return Cheque to Company
+        /// </summary>
         [StringLength(3)]
         [Unicode(false)]
         public string ReturnChequeMethod { get; set; }
@@ -155,9 +251,18 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(200)]
         [Unicode(false)]
         public string AcknowledgementDocumentNotify { get; set; }
+        /// <summary>
+        /// สถานที่จัดพิมพ์เช็ค ธนาคารจเป็นผู้กำหนด
+        /// </summary>
         [StringLength(15)]
         [Unicode(false)]
         public string PrintLocation { get; set; }
+        /// <summary>
+        /// หมายเลขชุดข้อมูลที่ระบบงาน สร้างขึ้นเพื่อลงทะเบียนรับข้อมูลเข้าระบบ (ธนาคารใช้)
+        /// </summary>
+        [StringLength(25)]
+        [Unicode(false)]
+        public string FileBatchNoBankReference { get; set; }
         [StringLength(30)]
         [Unicode(false)]
         public string KTBRef { get; set; }
@@ -185,9 +290,6 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(15)]
         [Unicode(false)]
         public string TotalMailRecord { get; set; }
-        [StringLength(25)]
-        [Unicode(false)]
-        public string FileBatchReference { get; set; }
         [StringLength(1317)]
         [Unicode(false)]
         public string Filler { get; set; }
@@ -197,6 +299,7 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(1)]
         [Unicode(false)]
         public string EndOfLine { get; set; }
+        public string BatchData { get; set; }
         [StringLength(1)]
         [Unicode(false)]
         public string DataType { get; set; }
@@ -205,5 +308,9 @@ namespace SMIXKTBConvenienceCheque.Models
         public int? CreatedByUserId { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
+
+        [ForeignKey("BatchControlId")]
+        [InverseProperty("BatchDetails")]
+        public virtual BatchControl BatchControl { get; set; }
     }
 }

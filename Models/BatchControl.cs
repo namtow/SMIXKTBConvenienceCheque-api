@@ -11,16 +11,37 @@ namespace SMIXKTBConvenienceCheque.Models
     [Table("BatchControl")]
     public partial class BatchControl
     {
+        public BatchControl()
+        {
+            BatchDetails = new HashSet<BatchDetail>();
+            BatchHeaders = new HashSet<BatchHeader>();
+            BatchOutPutDetails = new HashSet<BatchOutPutDetail>();
+            Details = new HashSet<Detail>();
+        }
+
         [Key]
         public int BatchControlId { get; set; }
         [StringLength(100)]
         [Unicode(false)]
         public string BatchControlCode { get; set; }
+        /// <summary>
+        /// 1 IN,2.OUT
+        /// </summary>
+        public int? BatchControlType { get; set; }
         public int? ItemCount { get; set; }
         public bool? IsActive { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? CreatedByUserId { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
+
+        [InverseProperty("BatchControl")]
+        public virtual ICollection<BatchDetail> BatchDetails { get; set; }
+        [InverseProperty("BatchControl")]
+        public virtual ICollection<BatchHeader> BatchHeaders { get; set; }
+        [InverseProperty("BatchControl")]
+        public virtual ICollection<BatchOutPutDetail> BatchOutPutDetails { get; set; }
+        [InverseProperty("BatchControl")]
+        public virtual ICollection<Detail> Details { get; set; }
     }
 }

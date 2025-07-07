@@ -22,6 +22,7 @@ namespace SMIXKTBConvenienceCheque.Data
         public virtual DbSet<BatchControl> BatchControls { get; set; }
         public virtual DbSet<BatchDetail> BatchDetails { get; set; }
         public virtual DbSet<BatchHeader> BatchHeaders { get; set; }
+        public virtual DbSet<BatchOutPutDetail> BatchOutPutDetails { get; set; }
         public virtual DbSet<Detail> Details { get; set; }
         public virtual DbSet<TmpImportClaim> TmpImportClaims { get; set; }
 
@@ -29,13 +30,20 @@ namespace SMIXKTBConvenienceCheque.Data
         {
             modelBuilder.UseCollation("Thai_100_CI_AI");
 
+            modelBuilder.Entity<BatchControl>(entity =>
+            {
+                entity.Property(e => e.BatchControlType).HasComment("1 IN,2.OUT");
+            });
+
             modelBuilder.Entity<BatchDetail>(entity =>
             {
                 entity.Property(e => e.AccountPayeeOnlyFlag).IsFixedLength();
 
                 entity.Property(e => e.AcknowledgementDocumentNotify).IsFixedLength();
 
-                entity.Property(e => e.BatchNo).IsFixedLength();
+                entity.Property(e => e.BatchNo)
+                    .IsFixedLength()
+                    .HasComment("ref เชื่อม Header กับ Trailer ");
 
                 entity.Property(e => e.CarriageReturn).IsFixedLength();
 
@@ -45,21 +53,27 @@ namespace SMIXKTBConvenienceCheque.Data
 
                 entity.Property(e => e.ChequeStatusDate).IsFixedLength();
 
-                entity.Property(e => e.DateReturnChequeToCompany).IsFixedLength();
+                entity.Property(e => e.DateReturnChequeToCompany)
+                    .IsFixedLength()
+                    .HasComment("วันที่ธนาคารจะเก็บรักษาตัวเช็คไว้ ");
 
                 entity.Property(e => e.DeliveryMethod).IsFixedLength();
 
-                entity.Property(e => e.EffectiveDate).IsFixedLength();
+                entity.Property(e => e.EffectiveDate)
+                    .IsFixedLength()
+                    .HasComment("วันที่บนหน้าเช็ค");
 
                 entity.Property(e => e.EmailAddress).IsFixedLength();
 
                 entity.Property(e => e.EndOfLine).IsFixedLength();
 
-                entity.Property(e => e.FaxNumber).IsFixedLength();
+                entity.Property(e => e.FaxNumber)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขโทรสารของผู้รับเช้ค");
 
-                entity.Property(e => e.FileBatchNoBankReference).IsFixedLength();
-
-                entity.Property(e => e.FileBatchReference).IsFixedLength();
+                entity.Property(e => e.FileBatchNoBankReference)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขชุดข้อมูลที่ระบบงาน สร้างขึ้นเพื่อลงทะเบียนรับข้อมูลเข้าระบบ (ธนาคารใช้)");
 
                 entity.Property(e => e.Filler).IsFixedLength();
 
@@ -67,71 +81,123 @@ namespace SMIXKTBConvenienceCheque.Data
 
                 entity.Property(e => e.FreeFiller).IsFixedLength();
 
-                entity.Property(e => e.InvoiceAmount).IsFixedLength();
+                entity.Property(e => e.InvoiceAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินรวมของ Invoice");
 
                 entity.Property(e => e.KTBRef).IsFixedLength();
 
                 entity.Property(e => e.MobileNumber).IsFixedLength();
 
-                entity.Property(e => e.NetChequeTransferAmount).IsFixedLength();
+                entity.Property(e => e.NetChequeTransferAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินสุทธิที่ต้องการให้พิมพ์บนเช็ค โดยทั่;ไปมีค่าเท่ากับ net invoice amount");
 
                 entity.Property(e => e.NotificationMethod).IsFixedLength();
 
-                entity.Property(e => e.PayType).IsFixedLength();
+                entity.Property(e => e.PayType)
+                    .IsFixedLength()
+                    .HasComment("C = Cashier’s Cheque");
 
-                entity.Property(e => e.PayeeAddress1).IsFixedLength();
+                entity.Property(e => e.PayeeAddress1)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่ผู้รับเงิน ( ถ้าไม่มีข้อมูลให้ใส่ - )");
 
-                entity.Property(e => e.PayeeAddress2).IsFixedLength();
+                entity.Property(e => e.PayeeAddress2)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่ผู้รับเงิน ( ถ้าไม่มีข้อมูลให้ใส่ - )");
 
-                entity.Property(e => e.PayeeAddress3).IsFixedLength();
+                entity.Property(e => e.PayeeAddress3)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่ผู้รับเงิน");
 
-                entity.Property(e => e.PayeeBankAccountNo).IsFixedLength();
+                entity.Property(e => e.PayeeBankAccountNo)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขบัญชีเงินฝากธนาคารของผู้รับเงิน");
 
-                entity.Property(e => e.PayeeBankCode).IsFixedLength();
+                entity.Property(e => e.PayeeBankCode)
+                    .IsFixedLength()
+                    .HasComment("รหัสธนาคารของผู้รับเงิน");
 
-                entity.Property(e => e.PayeeIdCardNo).IsFixedLength();
+                entity.Property(e => e.PayeeIdCardNo)
+                    .IsFixedLength()
+                    .HasComment("เอกสารแสดงตนของ Beneficiary");
 
-                entity.Property(e => e.PayeeName).IsFixedLength();
+                entity.Property(e => e.PayeeName)
+                    .IsFixedLength()
+                    .HasComment("Beneficiary Name ใช้พิมพ์บนหน้าเช็ค");
 
-                entity.Property(e => e.PayerAbbreviation).IsFixedLength();
+                entity.Property(e => e.PayerAbbreviation)
+                    .IsFixedLength()
+                    .HasComment("ชื่อย่อบริษัท  หรือ  Company Code");
 
-                entity.Property(e => e.PayerAccountNo).IsFixedLength();
+                entity.Property(e => e.PayerAccountNo)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขบัญชีของบริษัทผู้สั่งจ่ายเช็ค");
 
-                entity.Property(e => e.PayerAddress1).IsFixedLength();
+                entity.Property(e => e.PayerAddress1)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่ผู้ชำระเงิน 1");
 
-                entity.Property(e => e.PayerAddress2).IsFixedLength();
+                entity.Property(e => e.PayerAddress2)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่ผู้ชำระเงิน 2");
 
-                entity.Property(e => e.PayerAddress3).IsFixedLength();
+                entity.Property(e => e.PayerAddress3)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่ผู้ชำระเงิน 3");
 
-                entity.Property(e => e.PayerName).IsFixedLength();
+                entity.Property(e => e.PayerName)
+                    .IsFixedLength()
+                    .HasComment("ชื่อบริษัทผู้สั่งจ่ายเช็ค");
 
-                entity.Property(e => e.PayerSocialSecurity).IsFixedLength();
+                entity.Property(e => e.PayerSocialSecurity)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขประกันสังคมของบริษัทผู้สั่งจ่ายเช็ค");
 
-                entity.Property(e => e.PayerTaxID).IsFixedLength();
+                entity.Property(e => e.PayerTaxID)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขประจำตัวผู้เสียภาษีของบริษัทผู้สั่งจ่ายเช็ค");
 
-                entity.Property(e => e.PaymentRefNo1).IsFixedLength();
+                entity.Property(e => e.PaymentRefNo1)
+                    .IsFixedLength()
+                    .HasComment("รหัสอ้างอิงในการชำระเงินใช้เชื่อมความสัมพันธ์ของข้อมูลในแต่ละ Record Type เข้าด้วยกัน");
 
-                entity.Property(e => e.PaymentRefNo2).IsFixedLength();
+                entity.Property(e => e.PaymentRefNo2)
+                    .IsFixedLength()
+                    .HasComment("เลขที่อ้างอิงในการจ่ายเงิน 2");
 
-                entity.Property(e => e.PaymentRefNo3).IsFixedLength();
+                entity.Property(e => e.PaymentRefNo3)
+                    .IsFixedLength()
+                    .HasComment("เลขที่อ้างอิงในการจ่ายเงิน 3");
 
-                entity.Property(e => e.PickUpChequeLocation).IsFixedLength();
+                entity.Property(e => e.PickUpChequeLocation)
+                    .IsFixedLength()
+                    .HasComment("สถานที่พิมพ์เช็ค / รับเช็ค ใส่รหัสสาขา หรือรหัสศูนย์เช็ค");
 
-                entity.Property(e => e.PostCode).IsFixedLength();
+                entity.Property(e => e.PostCode)
+                    .IsFixedLength()
+                    .HasComment("รหัสไปรษณีย์");
 
-                entity.Property(e => e.PostCodeD).IsFixedLength();
-
-                entity.Property(e => e.PrintLocation).IsFixedLength();
+                entity.Property(e => e.PrintLocation)
+                    .IsFixedLength()
+                    .HasComment("สถานที่จัดพิมพ์เช็ค ธนาคารจเป็นผู้กำหนด");
 
                 entity.Property(e => e.RecordType).IsFixedLength();
 
-                entity.Property(e => e.ReturnChequeMethod).IsFixedLength();
+                entity.Property(e => e.ReturnChequeMethod)
+                    .IsFixedLength()
+                    .HasComment("วิธีการดำเนินการเมื่อถึงวัน Date Return Cheque to Company");
 
                 entity.Property(e => e.StrikethroughFlag).IsFixedLength();
 
-                entity.Property(e => e.SupplierRefNo).IsFixedLength();
+                entity.Property(e => e.SupplierRefNo)
+                    .IsFixedLength()
+                    .HasComment("รหัสอ้างอิงของ Supplier เพื่อใช้จัดกลุ่มข้อมูลกรณีรับเช็คมากกว่า 1 ฉบับ");
 
-                entity.Property(e => e.TotalDiscountAmount).IsFixedLength();
+                entity.Property(e => e.TotalDiscountAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินรวมของส่วนลดการค้า");
 
                 entity.Property(e => e.TotalInvoiceNetAmount).IsFixedLength();
 
@@ -143,20 +209,164 @@ namespace SMIXKTBConvenienceCheque.Data
 
                 entity.Property(e => e.TotalPaymentRecord).IsFixedLength();
 
-                entity.Property(e => e.TotalTaxableAmount).IsFixedLength();
+                entity.Property(e => e.TotalTaxableAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินรวมที่ใช้ในการคำนวณภาษีหัก ณ ที่จ่ายต่อเช็ค 1 ฉบับ");
 
-                entity.Property(e => e.TotalVATAmount).IsFixedLength();
+                entity.Property(e => e.TotalVATAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินรวมของ Invoice");
 
-                entity.Property(e => e.TotalWHTAmount).IsFixedLength();
+                entity.Property(e => e.TotalWHTAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินรวมของภาษีหัก ณ ที่จ่ายของ");
 
                 entity.Property(e => e.TotalWHTRecord).IsFixedLength();
 
-                entity.Property(e => e.VATPercent).IsFixedLength();
+                entity.Property(e => e.VATPercent)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินภาษีมูลค่าเพิ่ม");
+
+                entity.HasOne(d => d.BatchControl)
+                    .WithMany(p => p.BatchDetails)
+                    .HasForeignKey(d => d.BatchControlId)
+                    .HasConstraintName("FK_BatchDetail_BatchControl");
+            });
+
+            modelBuilder.Entity<BatchHeader>(entity =>
+            {
+                entity.HasOne(d => d.BatchControl)
+                    .WithMany(p => p.BatchHeaders)
+                    .HasForeignKey(d => d.BatchControlId)
+                    .HasConstraintName("FK_BatchHeader_BatchControl");
+            });
+
+            modelBuilder.Entity<BatchOutPutDetail>(entity =>
+            {
+                entity.Property(e => e.Address1)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่บริษัทผู้สั่งจ่ายเช็ค");
+
+                entity.Property(e => e.Address2)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่บริษัทผู้สั่งจ่ายเช็ค");
+
+                entity.Property(e => e.Address3)
+                    .IsFixedLength()
+                    .HasComment("ที่อยู่บริษัทผู้สั่งจ่ายเช็ค");
+
+                entity.Property(e => e.ChequeEffectiveDate)
+                    .IsFixedLength()
+                    .HasComment("วันทีพิมพ์บนหน้าเช็ค");
+
+                entity.Property(e => e.ChequeNumber)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขเช็ค");
+
+                entity.Property(e => e.ChequeStatus)
+                    .IsFixedLength()
+                    .HasComment("สถานะของเช็ค\r\nI :   Issue  ออกเช็คแล้ว\r\nD :   Deliver  รับเช็คแล้ว\r\nP :   Paid  เช็คเรียกเก็บแล้ว\r\nR :   Return ส่งเช็คคืนบริษัท\r\nS :   Stop  อายัดเช็ค\r\nC :   Canceled  ยกเลิกเช็ค\r\n");
+
+                entity.Property(e => e.CompanyAbbreviation)
+                    .IsFixedLength()
+                    .HasComment("ชื่อย่อบริษัท");
+
+                entity.Property(e => e.CompanyName)
+                    .IsFixedLength()
+                    .HasComment("ชื่อบริษัทผู้สั่งจ่ายเช็ค");
+
+                entity.Property(e => e.NetCheque)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินจ่ายสุทธิ (ตามเช็ค)");
+
+                entity.Property(e => e.OutwardDate)
+                    .IsFixedLength()
+                    .HasComment("วันทีพิมพ์เช็ค");
+
+                entity.Property(e => e.PayeeAccountNumber)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขบัญชีที่ตัดจ่ายเช็ค");
+
+                entity.Property(e => e.PayeeName)
+                    .IsFixedLength()
+                    .HasComment("ชื่อผู้รับเช็ค");
+
+                entity.Property(e => e.PayeeTaxIdNumber)
+                    .IsFixedLength()
+                    .HasComment("เลขประจำตัวผู้เสียภาษีของบริษัทผู้สั่งจ่ายเช็ค");
+
+                entity.Property(e => e.PaymentRefNo1)
+                    .IsFixedLength()
+                    .HasComment("รหัสอ้างอิงการชำระเงินที่บริษัทส่งมา");
+
+                entity.Property(e => e.RecordType).IsFixedLength();
+
+                entity.Property(e => e.Sequence)
+                    .IsFixedLength()
+                    .HasComment("ลำดับที่ของรายการที่มีการเปลี่ยนแปลงสถานะ");
+
+                entity.Property(e => e.SocialSecurityId)
+                    .IsFixedLength()
+                    .HasComment("เลขประกันสังคมของบริษัทผู้สั่งจ่ายเช็ค");
+
+                entity.Property(e => e.TotalRecords)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเช็คทั้งหมดที่มีการเปลี่ยนแปลง");
+
+                entity.Property(e => e.TransactionDate)
+                    .IsFixedLength()
+                    .HasComment("วันที่สถานะเช็คเปลี่ยนแปลง");
+
+                entity.Property(e => e.WithholdingTaxAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินหักภาษี ณ ที่จ่าย");
+
+                entity.HasOne(d => d.BatchControl)
+                    .WithMany(p => p.BatchOutPutDetails)
+                    .HasForeignKey(d => d.BatchControlId)
+                    .HasConstraintName("FK_BatchOutPutDetail_BatchControl");
             });
 
             modelBuilder.Entity<Detail>(entity =>
             {
+                entity.Property(e => e.ChequeEffectiveDate)
+                    .IsFixedLength()
+                    .HasComment("วันทีพิมพ์บนหน้าเช็ค");
+
+                entity.Property(e => e.ChequeNumber)
+                    .IsFixedLength()
+                    .HasComment("หมายเลขเช็ค");
+
+                entity.Property(e => e.ChequeStatus)
+                    .IsFixedLength()
+                    .HasComment("สถานะของเช็ค \r\nI :   Issue  ออกเช็คแล้ว \r\nD :   Deliver  รับเช็คแล้ว \r\nP :   Paid  เช็คเรียกเก็บแล้ว \r\nR :   Return ส่งเช็คคืนบริษัท \r\nS :   Stop  อายัดเช็ค \r\nC :   Canceled  ยกเลิกเช็ค");
+
+                entity.Property(e => e.NetCheque)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินจ่ายสุทธิ (ตามเช็ค)");
+
+                entity.Property(e => e.OutwardDate)
+                    .IsFixedLength()
+                    .HasComment("วันทีพิมพ์เช็ค");
+
+                entity.Property(e => e.PayeeName)
+                    .IsFixedLength()
+                    .HasComment("ชื่อผู้รับเช็ค");
+
                 entity.Property(e => e.Prefix).IsFixedLength();
+
+                entity.Property(e => e.TransactionDate)
+                    .IsFixedLength()
+                    .HasComment("วันที่สถานะเช็คเปลี่ยนแปลง");
+
+                entity.Property(e => e.WithholdingTaxAmount)
+                    .IsFixedLength()
+                    .HasComment("จำนวนเงินหักภาษี ณ ที่จ่าย");
+
+                entity.HasOne(d => d.BatchControl)
+                    .WithMany(p => p.Details)
+                    .HasForeignKey(d => d.BatchControlId)
+                    .HasConstraintName("FK_Detail_BatchControl");
             });
 
             OnModelCreatingPartial(modelBuilder);
