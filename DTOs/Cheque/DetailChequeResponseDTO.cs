@@ -6,9 +6,9 @@ namespace SMIXKTBConvenienceCheque.DTOs.Cheque
     {
         public string RecordType { get; set; }
         public string PaymentRefNo1 { get; set; }
-        public string PaymentReferenceNo2 { get; set; }
-        public string PaymentReferenceNo3 { get; set; }
-        public string SupplierReferenceNo { get; set; }
+        public string PaymentRefNo2 { get; set; }
+        public string PaymentRefNo3 { get; set; }
+        public string SupplierRefNo { get; set; }
         public string PayType { get; set; }
         public string PayeeName { get; set; }
         public string PayeeIdCardNo { get; set; }
@@ -17,7 +17,7 @@ namespace SMIXKTBConvenienceCheque.DTOs.Cheque
         public string PayeeAddress3 { get; set; }
         public string PostCode { get; set; }
         public string PayeeBankCode { get; set; }
-        public string PayeeBankACNo { get; set; }
+        public string PayeeBankAccountNo { get; set; }
         public string EffectiveDate { get; set; }
         public string InvoiceAmount { get; set; }
         public string TotalVATAmount { get; set; }
@@ -25,7 +25,7 @@ namespace SMIXKTBConvenienceCheque.DTOs.Cheque
         public string TotalWHTAmount { get; set; }
         public string TotalTaxableAmount { get; set; }
         public string TotalDiscountAmount { get; set; }
-        public string NetChequeTrAmount { get; set; }
+        public string NetChequeTransferAmount { get; set; }
         public string DeliveryMethod { get; set; }
         public string PickupchequeLocation { get; set; }
         public string ChequeNumber { get; set; }

@@ -30,7 +30,7 @@ namespace SMIXKTBConvenienceCheque.DTOs.Cheque
         public string PostCode { get; set; }
 
         [StringLength(20)]
-        public string PayerACNo { get; set; }
+        public string PayerAccountNo { get; set; }
 
         [StringLength(15)]
         public string PayerTaxID { get; set; }
@@ -45,10 +45,10 @@ namespace SMIXKTBConvenienceCheque.DTOs.Cheque
         public string BatchNo { get; set; }
 
         [StringLength(25)]
-        public string BankReference { get; set; }
+        public string FileBatchNoBankReference { get; set; }
 
         [StringLength(5)]
-        public string KTB { get; set; }
+        public string KTBRef { get; set; }
 
         [StringLength(1049)]
         public string Filler { get; set; }
