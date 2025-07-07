@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using SMIXKTBConvenienceCheque.DTOs.BatchOutput;
+using SMIXKTBConvenienceCheque.Models;
 
 namespace SMIXKTBConvenienceCheque
 {
@@ -6,13 +8,19 @@ namespace SMIXKTBConvenienceCheque
     {
         public AutoMapperProfile()
         {
-            /*
-             * CreateMap<SampleMessage, ExampleModels>()
-             *     .ForMember(_ => _.ExampleName, _ => _.MapFrom(_ => _.Name))
-             *     .ReverseMap();
-             * 
-             * CreateMap<ExampleModels, GetExampleReponseDto>();
-             */
+            CreateMap<BatchOutputDetailDTO, BatchOutPutDetail>()
+            .ForAllMembers(opt =>
+            {
+                if (opt.DestinationMember.Name != nameof(BatchOutputDetailDTO.BatchData))
+                {
+                    opt.AddTransform(s => TrimString(s));
+                }
+            });
+        }
+
+        private static object TrimString(object value)
+        {
+            return value is string str ? str.Trim() : value;
         }
     }
 }

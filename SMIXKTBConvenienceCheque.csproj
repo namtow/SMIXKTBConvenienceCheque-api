@@ -59,6 +59,7 @@
 		<Folder Include="Logs\" />
 		<Folder Include="Migrations\" />
 		<Folder Include="Models\Partials\" />
+		<Folder Include="Services\BatchOutput\" />
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
 
