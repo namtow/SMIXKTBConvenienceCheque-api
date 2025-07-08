@@ -100,7 +100,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 var details = importClaim.Select(d => new DetailChequeResponseDTO
                 {
                     RecordType = "D".PadRight(1),
-                    PaymentRefNo1 = $"{d.ApplicationCode}{d.SeqNo.ToString().PadLeft(4, '0')}".PadRight(20),
+                    PaymentRefNo1 = d.SchoolRunning == null ? "".PadRight(20) : d.SchoolRunning.PadRight(20),
                     PaymentRefNo2 = d.Reference2 == null ? "".PadRight(20) : d.Reference2.Replace("-", "").PadRight(20),
                     PaymentRefNo3 = d.Reference3 == null ? "".PadRight(20) : d.Reference3.Replace("-", "").PadRight(20),
                     SupplierRefNo = "".PadRight(15),
