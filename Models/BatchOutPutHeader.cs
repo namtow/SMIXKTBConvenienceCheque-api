@@ -8,35 +8,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SMIXKTBConvenienceCheque.Models
 {
-    [Table("BatchControl")]
-    public partial class BatchControl
+    [Table("BatchOutPutHeader")]
+    public partial class BatchOutPutHeader
     {
-        public BatchControl()
+        public BatchOutPutHeader()
         {
-            BatchFileNos = new HashSet<BatchFileNo>();
-            ChequeDetails = new HashSet<ChequeDetail>();
+            BatchOutPutDetails = new HashSet<BatchOutPutDetail>();
         }
 
         [Key]
-        public int BatchControlId { get; set; }
-        public int? FileNo { get; set; }
+        public int BatchOutPutHeaderId { get; set; }
         [StringLength(100)]
         [Unicode(false)]
-        public string BatchControlCode { get; set; }
+        public string BatchOutPutHeaderCode { get; set; }
+        [StringLength(255)]
+        public string FileName { get; set; }
         public int? ItemCount { get; set; }
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? SumAmount { get; set; }
-        [Column(TypeName = "date")]
-        public DateTime? EffectiveDate { get; set; }
         public bool? IsActive { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? CreatedByUserId { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
 
-        [InverseProperty("BatchControl")]
-        public virtual ICollection<BatchFileNo> BatchFileNos { get; set; }
-        [InverseProperty("BatchControl")]
-        public virtual ICollection<ChequeDetail> ChequeDetails { get; set; }
+        [InverseProperty("BatchOutPutHeader")]
+        public virtual ICollection<BatchOutPutDetail> BatchOutPutDetails { get; set; }
     }
 }

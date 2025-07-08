@@ -21,19 +21,16 @@ namespace SMIXKTBConvenienceCheque.Data
 
         public virtual DbSet<BatchControl> BatchControls { get; set; }
         public virtual DbSet<BatchDetail> BatchDetails { get; set; }
+        public virtual DbSet<BatchFileNo> BatchFileNos { get; set; }
         public virtual DbSet<BatchHeader> BatchHeaders { get; set; }
         public virtual DbSet<BatchOutPutDetail> BatchOutPutDetails { get; set; }
-        public virtual DbSet<Detail> Details { get; set; }
+        public virtual DbSet<BatchOutPutHeader> BatchOutPutHeaders { get; set; }
+        public virtual DbSet<ChequeDetail> ChequeDetails { get; set; }
         public virtual DbSet<TmpImportClaim> TmpImportClaims { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseCollation("Thai_100_CI_AI");
-
-            modelBuilder.Entity<BatchControl>(entity =>
-            {
-                entity.Property(e => e.BatchControlType).HasComment("1 IN,2.OUT");
-            });
 
             modelBuilder.Entity<BatchDetail>(entity =>
             {
@@ -227,18 +224,26 @@ namespace SMIXKTBConvenienceCheque.Data
                     .IsFixedLength()
                     .HasComment("จำนวนเงินภาษีมูลค่าเพิ่ม");
 
-                entity.HasOne(d => d.BatchControl)
+                entity.HasOne(d => d.BatchFileNo)
                     .WithMany(p => p.BatchDetails)
+                    .HasForeignKey(d => d.BatchFileNoId)
+                    .HasConstraintName("FK_BatchDetail_BatchFileNo");
+            });
+
+            modelBuilder.Entity<BatchFileNo>(entity =>
+            {
+                entity.HasOne(d => d.BatchControl)
+                    .WithMany(p => p.BatchFileNos)
                     .HasForeignKey(d => d.BatchControlId)
-                    .HasConstraintName("FK_BatchDetail_BatchControl");
+                    .HasConstraintName("FK_BatchFileNo_BatchControl");
             });
 
             modelBuilder.Entity<BatchHeader>(entity =>
             {
-                entity.HasOne(d => d.BatchControl)
+                entity.HasOne(d => d.BatchFileNo)
                     .WithMany(p => p.BatchHeaders)
-                    .HasForeignKey(d => d.BatchControlId)
-                    .HasConstraintName("FK_BatchHeader_BatchControl");
+                    .HasForeignKey(d => d.BatchFileNoId)
+                    .HasConstraintName("FK_BatchHeader_BatchFileNo");
             });
 
             modelBuilder.Entity<BatchOutPutDetail>(entity =>
@@ -321,52 +326,34 @@ namespace SMIXKTBConvenienceCheque.Data
                     .IsFixedLength()
                     .HasComment("จำนวนเงินหักภาษี ณ ที่จ่าย");
 
-                entity.HasOne(d => d.BatchControl)
+                entity.HasOne(d => d.BatchOutPutHeader)
                     .WithMany(p => p.BatchOutPutDetails)
-                    .HasForeignKey(d => d.BatchControlId)
-                    .HasConstraintName("FK_BatchOutPutDetail_BatchControl");
+                    .HasForeignKey(d => d.BatchOutPutHeaderId)
+                    .HasConstraintName("FK_BatchOutPutDetail_BatchOutPutHeader");
             });
 
-            modelBuilder.Entity<Detail>(entity =>
+            modelBuilder.Entity<ChequeDetail>(entity =>
             {
-                entity.Property(e => e.ChequeEffectiveDate)
-                    .IsFixedLength()
-                    .HasComment("วันทีพิมพ์บนหน้าเช็ค");
+                entity.Property(e => e.ChequeEffectiveDate).HasComment("วันทีพิมพ์บนหน้าเช็ค");
 
-                entity.Property(e => e.ChequeNumber)
-                    .IsFixedLength()
-                    .HasComment("หมายเลขเช็ค");
+                entity.Property(e => e.ChequeNumber).HasComment("หมายเลขเช็ค");
 
-                entity.Property(e => e.ChequeStatus)
-                    .IsFixedLength()
-                    .HasComment("สถานะของเช็ค \r\nI :   Issue  ออกเช็คแล้ว \r\nD :   Deliver  รับเช็คแล้ว \r\nP :   Paid  เช็คเรียกเก็บแล้ว \r\nR :   Return ส่งเช็คคืนบริษัท \r\nS :   Stop  อายัดเช็ค \r\nC :   Canceled  ยกเลิกเช็ค");
+                entity.Property(e => e.ChequeStatus).HasComment("สถานะของเช็ค \r\nI :   Issue  ออกเช็คแล้ว \r\nD :   Deliver  รับเช็คแล้ว \r\nP :   Paid  เช็คเรียกเก็บแล้ว \r\nR :   Return ส่งเช็คคืนบริษัท \r\nS :   Stop  อายัดเช็ค \r\nC :   Canceled  ยกเลิกเช็ค");
 
-                entity.Property(e => e.NetCheque)
-                    .IsFixedLength()
-                    .HasComment("จำนวนเงินจ่ายสุทธิ (ตามเช็ค)");
+                entity.Property(e => e.NetCheque).HasComment("จำนวนเงินจ่ายสุทธิ (ตามเช็ค)");
 
-                entity.Property(e => e.OutwardDate)
-                    .IsFixedLength()
-                    .HasComment("วันทีพิมพ์เช็ค");
+                entity.Property(e => e.OutwardDate).HasComment("วันทีพิมพ์เช็ค");
 
-                entity.Property(e => e.PayeeName)
-                    .IsFixedLength()
-                    .HasComment("ชื่อผู้รับเช็ค");
+                entity.Property(e => e.PayeeName).HasComment("ชื่อผู้รับเช็ค");
 
-                entity.Property(e => e.Prefix).IsFixedLength();
+                entity.Property(e => e.TransactionDate).HasComment("วันที่สถานะเช็คเปลี่ยนแปลง");
 
-                entity.Property(e => e.TransactionDate)
-                    .IsFixedLength()
-                    .HasComment("วันที่สถานะเช็คเปลี่ยนแปลง");
-
-                entity.Property(e => e.WithholdingTaxAmount)
-                    .IsFixedLength()
-                    .HasComment("จำนวนเงินหักภาษี ณ ที่จ่าย");
+                entity.Property(e => e.WithholdingTaxAmount).HasComment("จำนวนเงินหักภาษี ณ ที่จ่าย");
 
                 entity.HasOne(d => d.BatchControl)
-                    .WithMany(p => p.Details)
+                    .WithMany(p => p.ChequeDetails)
                     .HasForeignKey(d => d.BatchControlId)
-                    .HasConstraintName("FK_Detail_BatchControl");
+                    .HasConstraintName("FK_ChequeDetail_BatchControl");
             });
 
             OnModelCreatingPartial(modelBuilder);

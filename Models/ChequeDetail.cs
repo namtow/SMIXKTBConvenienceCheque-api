@@ -8,51 +8,48 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SMIXKTBConvenienceCheque.Models
 {
-    [Table("Detail")]
-    public partial class Detail
+    [Table("ChequeDetail")]
+    public partial class ChequeDetail
     {
         [Key]
-        public int DetailId { get; set; }
+        public int ChequeDetailId { get; set; }
         public int? BatchControlId { get; set; }
+        public int? BatchFileNoId { get; set; }
         [StringLength(20)]
         [Unicode(false)]
         public string AppId { get; set; }
         [StringLength(20)]
         [Unicode(false)]
         public string ClaimNo { get; set; }
-        [StringLength(20)]
+        [StringLength(100)]
         [Unicode(false)]
         public string Prefix { get; set; }
         /// <summary>
         /// วันทีพิมพ์บนหน้าเช็ค
         /// </summary>
-        [StringLength(8)]
-        [Unicode(false)]
-        public string ChequeEffectiveDate { get; set; }
+        [Column(TypeName = "date")]
+        public DateTime? ChequeEffectiveDate { get; set; }
         /// <summary>
         /// หมายเลขเช็ค
         /// </summary>
-        [StringLength(10)]
+        [StringLength(100)]
         [Unicode(false)]
         public string ChequeNumber { get; set; }
         /// <summary>
         /// ชื่อผู้รับเช็ค
         /// </summary>
-        [StringLength(100)]
-        [Unicode(false)]
+        [StringLength(255)]
         public string PayeeName { get; set; }
         /// <summary>
         /// จำนวนเงินหักภาษี ณ ที่จ่าย
         /// </summary>
-        [StringLength(20)]
-        [Unicode(false)]
-        public string WithholdingTaxAmount { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? WithholdingTaxAmount { get; set; }
         /// <summary>
         /// จำนวนเงินจ่ายสุทธิ (ตามเช็ค)
         /// </summary>
-        [StringLength(20)]
-        [Unicode(false)]
-        public string NetCheque { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? NetCheque { get; set; }
         /// <summary>
         /// สถานะของเช็ค 
         /// I :   Issue  ออกเช็คแล้ว 
@@ -62,21 +59,19 @@ namespace SMIXKTBConvenienceCheque.Models
         /// S :   Stop  อายัดเช็ค 
         /// C :   Canceled  ยกเลิกเช็ค
         /// </summary>
-        [StringLength(5)]
+        [StringLength(100)]
         [Unicode(false)]
         public string ChequeStatus { get; set; }
         /// <summary>
         /// วันที่สถานะเช็คเปลี่ยนแปลง
         /// </summary>
-        [StringLength(8)]
-        [Unicode(false)]
-        public string TransactionDate { get; set; }
+        [Column(TypeName = "date")]
+        public DateTime? TransactionDate { get; set; }
         /// <summary>
         /// วันทีพิมพ์เช็ค
         /// </summary>
-        [StringLength(8)]
-        [Unicode(false)]
-        public string OutwardDate { get; set; }
+        [Column(TypeName = "date")]
+        public DateTime? OutwardDate { get; set; }
         public bool? IsActive { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? CreatedByUserId { get; set; }
@@ -84,7 +79,7 @@ namespace SMIXKTBConvenienceCheque.Models
         public int? UpdatedByUserId { get; set; }
 
         [ForeignKey("BatchControlId")]
-        [InverseProperty("Details")]
+        [InverseProperty("ChequeDetails")]
         public virtual BatchControl BatchControl { get; set; }
     }
 }

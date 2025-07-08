@@ -8,35 +8,36 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SMIXKTBConvenienceCheque.Models
 {
-    [Table("BatchControl")]
-    public partial class BatchControl
+    [Table("BatchFileNo")]
+    public partial class BatchFileNo
     {
-        public BatchControl()
+        public BatchFileNo()
         {
-            BatchFileNos = new HashSet<BatchFileNo>();
-            ChequeDetails = new HashSet<ChequeDetail>();
+            BatchDetails = new HashSet<BatchDetail>();
+            BatchHeaders = new HashSet<BatchHeader>();
         }
 
         [Key]
-        public int BatchControlId { get; set; }
-        public int? FileNo { get; set; }
-        [StringLength(100)]
-        [Unicode(false)]
-        public string BatchControlCode { get; set; }
+        public int BatchFileNoId { get; set; }
+        public int? BatchControlId { get; set; }
         public int? ItemCount { get; set; }
         [Column(TypeName = "decimal(18, 2)")]
         public decimal? SumAmount { get; set; }
+        public int? BatchNo { get; set; }
         [Column(TypeName = "date")]
-        public DateTime? EffectiveDate { get; set; }
+        public DateTime? UploadDate { get; set; }
         public bool? IsActive { get; set; }
         public DateTime? CreatedDate { get; set; }
         public int? CreatedByUserId { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
 
-        [InverseProperty("BatchControl")]
-        public virtual ICollection<BatchFileNo> BatchFileNos { get; set; }
-        [InverseProperty("BatchControl")]
-        public virtual ICollection<ChequeDetail> ChequeDetails { get; set; }
+        [ForeignKey("BatchControlId")]
+        [InverseProperty("BatchFileNos")]
+        public virtual BatchControl BatchControl { get; set; }
+        [InverseProperty("BatchFileNo")]
+        public virtual ICollection<BatchDetail> BatchDetails { get; set; }
+        [InverseProperty("BatchFileNo")]
+        public virtual ICollection<BatchHeader> BatchHeaders { get; set; }
     }
 }

@@ -52,8 +52,14 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(20)]
         [Unicode(false)]
         public string ZipCode { get; set; }
-        public int? fileNo { get; set; }
-        public int? seqNo { get; set; }
-        public int? batchNo { get; set; }
+        public int? FileNo { get; set; }
+        public int? SeqNo { get; set; }
+        public int? BatchNo { get; set; }
+        [StringLength(20)]
+        [Unicode(false)]
+        public string Reference2 { get; set; }
+        [StringLength(20)]
+        [Unicode(false)]
+        public string Reference3 { get; set; }
     }
 }

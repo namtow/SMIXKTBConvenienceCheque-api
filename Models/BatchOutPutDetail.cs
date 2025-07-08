@@ -13,7 +13,7 @@ namespace SMIXKTBConvenienceCheque.Models
     {
         [Key]
         public int BatchOutPutDetailId { get; set; }
-        public int? BatchControlId { get; set; }
+        public int? BatchOutPutHeaderId { get; set; }
         [StringLength(1)]
         [Unicode(false)]
         public string RecordType { get; set; }
@@ -148,8 +148,8 @@ namespace SMIXKTBConvenienceCheque.Models
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
 
-        [ForeignKey("BatchControlId")]
+        [ForeignKey("BatchOutPutHeaderId")]
         [InverseProperty("BatchOutPutDetails")]
-        public virtual BatchControl BatchControl { get; set; }
+        public virtual BatchOutPutHeader BatchOutPutHeader { get; set; }
     }
 }

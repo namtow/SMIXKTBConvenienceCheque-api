@@ -13,7 +13,7 @@ namespace SMIXKTBConvenienceCheque.Models
     {
         [Key]
         public int BatchHeaderId { get; set; }
-        public int? BatchControlId { get; set; }
+        public int? BatchFileNoId { get; set; }
         [StringLength(20)]
         [Unicode(false)]
         public string AppId { get; set; }
@@ -26,8 +26,8 @@ namespace SMIXKTBConvenienceCheque.Models
         public DateTime? UpdatedDate { get; set; }
         public int? UpdatedByUserId { get; set; }
 
-        [ForeignKey("BatchControlId")]
+        [ForeignKey("BatchFileNoId")]
         [InverseProperty("BatchHeaders")]
-        public virtual BatchControl BatchControl { get; set; }
+        public virtual BatchFileNo BatchFileNo { get; set; }
     }
 }
