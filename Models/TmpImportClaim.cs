@@ -61,5 +61,8 @@ namespace SMIXKTBConvenienceCheque.Models
         [StringLength(20)]
         [Unicode(false)]
         public string Reference3 { get; set; }
+        [StringLength(20)]
+        [Unicode(false)]
+        public string SchoolRunning { get; set; }
     }
 }
