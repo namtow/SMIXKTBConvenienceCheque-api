@@ -38,6 +38,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 var batchNoGen = Guid.NewGuid().ToString().Substring(0, 23).Replace("-", "");
                 //format to string
                 var effectiveDate = req.EffectiveDate.ToString("ddMMyyyy");
+                var uploadDate = req.UploadDate.Value.ToString("ddMMyyyy");
 
                 var tmpDetail = _dBContext.TmpImportClaims.AsNoTracking();
 
@@ -71,10 +72,10 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     PayerAddress1 = "".PadRight(70),
                     PayerAddress2 = "".PadRight(70),
                     PayerAddress3 = "".PadRight(70),
-                    PostCode = "12130".PadRight(5),
+                    PostCode = "".PadRight(5),
                     PayerAccountNo = "1526007770".PadRight(20),
                     PayerTaxID = "0107555000538".PadRight(15),
-                    PayerSocialSecurity = "107555000538".PadRight(15),
+                    PayerSocialSecurity = "0107555000538".PadRight(15),
                     EffectiveDate = effectiveDate.PadRight(8),
                     BatchNo = batchNoGen.PadRight(35),
                     FileBatchNoBankReference = "".PadRight(25),
@@ -222,7 +223,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     Data = resultBytes,
                     IsResult = true,
                     Message = "Success",
-                    FileName = $"SSIN EX_Kcorp_ConChq_{req.UploadDate}_{req.FileNo}_{req.BatchNo}_{countTotal}_{amountTotal}.txt"
+                    FileName = $"SSIN EX_Kcorp_ConChq_{uploadDate}_{req.FileNo}_{req.BatchNo}_{countTotal}_{amountTotal}.txt"
                 };
 
                 return ResponseResult.Success(dataOut);
