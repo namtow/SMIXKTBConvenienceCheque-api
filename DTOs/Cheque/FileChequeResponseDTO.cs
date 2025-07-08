@@ -11,6 +11,8 @@ namespace SMIXKTBConvenienceCheque.DTOs.Cheque
         public int FileNo { get; set; }
 
         public int BatchNo { get; set; }
+
+        [Required]
         public DateTime? UploadDate { get; set; }
     }
 }
