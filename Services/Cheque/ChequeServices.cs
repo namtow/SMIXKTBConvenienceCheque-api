@@ -61,7 +61,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
                 #region select header
 
-                _logger.Debug("[{ServiceName}][{MethodName}] - Select header", _serviceName, methodName, DateTime.Now);
+                _logger.Debug("[{ServiceName}][{MethodName}] - Select header", _serviceName, methodName);
                 //Header data
                 var header = new HeaderChequeResponseDTO
                 {
@@ -93,6 +93,8 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 #endregion select header
 
                 #region select detial
+
+                _logger.Debug("[{ServiceName}][{MethodName}] - Select Detail", _serviceName, methodName);
 
                 //Detail data
                 var details = importClaim.Select(d => new DetailChequeResponseDTO
@@ -161,6 +163,8 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
                 #region select trailer
 
+                _logger.Debug("[{ServiceName}][{MethodName}] - Select Trailer", _serviceName, methodName);
+
                 //Trailer
                 var trailer = new TrailerChequeResponseDTO
                 {
@@ -190,6 +194,8 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 await using var transaction = await _dBContext.Database.BeginTransactionAsync();
                 try
                 {
+                    _logger.Debug("[{ServiceName}][{MethodName}] - Call function to upsert", _serviceName, methodName);
+
                     var resultId = await InsertBatchControll(tmpCount, amountTotal, req.FileNo, req.BatchNo, req.EffectiveDate, req.UploadDate);
 
                     await InsertBatchHeader(importClaim, resultId.BatchFileNoId);
@@ -288,6 +294,10 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
         private async Task<InsertBatchControllResponseDTO> InsertBatchControll(int count, decimal? sum, int? fileNo, int? batchNo, DateTime? effectiveDate, DateTime? uploadDate)
         {
+            var methodName = nameof(InsertBatchControll);
+
+            _logger.Debug("[{FunctionName}] - Upsert BatchControl", methodName);
+
             var now = DateTime.Now;
 
             //ตรวจสอบว่าเคยนำเข้ารึยัง
@@ -333,13 +343,14 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
             controlId = checkControl == null ? controlInsert.BatchControlId
                         : checkControl.BatchControlId;
 
+            _logger.Debug("[{FunctionName}] - Insert BatchFileNo", methodName);
             //insert batch file no
             BatchFileNo batchFileNo = new();
             batchFileNo.IsActive = true;
             batchFileNo.BatchControlId = controlId;
             batchFileNo.BatchNo = batchNo;
             batchFileNo.ItemCount = count;
-            batchFileNo.SumAmount = sum; //todo
+            batchFileNo.SumAmount = sum;
             batchFileNo.UploadDate = uploadDate;
             batchFileNo.CreatedDate = now;
             batchFileNo.CreatedByUserId = 1;
@@ -360,6 +371,9 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
         private async Task InsertBatchHeader(List<TmpImportClaim> data, int id)
         {
+            var methodName = nameof(InsertBatchHeader);
+            _logger.Debug("[{FunctionName}] - Insert BatchHeader", methodName);
+
             var now = DateTime.Now;
             var tmpHeader = data
                 .Where(h => h.PayTotal.HasValue)
@@ -395,6 +409,8 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
         private async Task InsertBatchDetail(int id, HeaderChequeResponseDTO header, string headerString, List<DetailChequeResponseDTO> listDetail, TrailerChequeResponseDTO footer, string footerString)
         {
+            var methodName = nameof(InsertBatchDetail);
+            _logger.Debug("[{FunctionName}] - Insert BatchDetail", methodName);
             var now = DateTime.Now;
 
             var finalBatchDetail = new List<BatchDetail>();
@@ -452,6 +468,9 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
         private async Task InsertChequeDetail(InsertBatchControllResponseDTO id, List<TmpImportClaim> data)
         {
+            var methodName = nameof(InsertChequeDetail);
+            _logger.Debug("[{FunctionName}] - Insert ChequeDetail", methodName);
+
             var now = DateTime.Now;
 
             List<ChequeDetail> finalDetail = new();
