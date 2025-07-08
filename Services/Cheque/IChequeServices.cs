@@ -5,6 +5,6 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 {
     public interface IChequeServices
     {
-        Task<ServiceResponse<FileResponseDTO>> CreateFileCheque();
+        Task<ServiceResponse<FileResponseDTO>> CreateFileCheque(FileChequeResponseDTO req);
     }
 }

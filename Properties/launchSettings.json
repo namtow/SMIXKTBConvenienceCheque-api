@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "DemoPOS": {
+    "SMIXKTBConvenienceCheque": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",

@@ -26,34 +26,42 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
             _logger = Log.ForContext<ChequeServices>();
         }
 
-        public async Task<ServiceResponse<FileResponseDTO>> CreateFileCheque()
+        public async Task<ServiceResponse<FileResponseDTO>> CreateFileCheque(FileChequeResponseDTO req)
         {
+            //PadRight >> เติมช่องว่างทางขวา
+            //PadRight >> เติมช่องว่างทางซ้าย
             var methodName = nameof(ChequeServices);
             try
             {
                 _logger.Debug("[{ServiceName}][{MethodName}] - Start create file text date: {Date}", _serviceName, methodName, DateTime.Now);
-                //PadRight >> เติมช่องว่างทางขวา
-                //PadRight >> เติมช่องว่างทางซ้าย
+
                 var batchNoGen = Guid.NewGuid().ToString().Substring(0, 23).Replace("-", "");
-                var effectiveDate = "08072025";
-                var fileNo = 4;
-                var batchNo = 1;
+                //format to string
+                var effectiveDate = req.EffectiveDate.ToString("ddMMyyyy");
 
-                var tmpDetail = await _dBContext.TmpImportClaims.Where(x => x.fileNo == fileNo && x.batchNo == batchNo)
-                  //.Take(4988)
-                  .OrderByDescending(a => a.ApplicationCode).ThenBy(a => a.seqNo)
-                  .ToListAsync();
+                var tmpDetail = _dBContext.TmpImportClaims.AsNoTracking();
 
-                if (tmpDetail.Count == 0)
+                if (req.FileNo != 0)
+                    tmpDetail = tmpDetail.Where(f => f.FileNo == req.FileNo);
+
+                if (req.BatchNo != 0)
+                    tmpDetail = tmpDetail.Where(b => b.BatchNo == req.BatchNo);
+
+                //select data to insert
+                var importClaim = await tmpDetail.OrderByDescending(a => a.ApplicationCode).ThenBy(a => a.SeqNo).AsNoTracking().ToListAsync();
+
+                if (importClaim.Count == 0)
                     throw new Exception("Data import detail Not found.");
 
-                var amountTotal = tmpDetail.Sum(t => t.PayTotal);
+                //set data
+                var amountTotal = importClaim.Sum(t => t.PayTotal);
                 var amountPayment = amountTotal == null ? "0.00" : amountTotal.Value.ToString("#,##0.00", CultureInfo.InvariantCulture);
-                int tmpCount = tmpDetail.Count;
-                var countTotal = tmpDetail.Count.ToString();
+                int tmpCount = importClaim.Count;
+                var countTotal = importClaim.Count.ToString();
 
                 #region select header
 
+                _logger.Debug("[{ServiceName}][{MethodName}] - Select header", _serviceName, methodName, DateTime.Now);
                 //Header data
                 var header = new HeaderChequeResponseDTO
                 {
@@ -84,13 +92,15 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
                 #endregion select header
 
+                #region select detial
+
                 //Detail data
-                var details = tmpDetail.Select(d => new DetailChequeResponseDTO
+                var details = importClaim.Select(d => new DetailChequeResponseDTO
                 {
                     RecordType = "D".PadRight(1),
-                    PaymentRefNo1 = $"{d.ApplicationCode}{d.seqNo.ToString().PadLeft(4, '0')}".PadRight(20),
-                    PaymentRefNo2 = d.BranchId.ToString().PadRight(20),
-                    PaymentRefNo3 = d.ClaimNo.Replace("-", "").PadRight(20),
+                    PaymentRefNo1 = $"{d.ApplicationCode}{d.SeqNo.ToString().PadLeft(4, '0')}".PadRight(20),
+                    PaymentRefNo2 = d.Reference2 == null ? "".PadRight(20) : d.Reference2.Replace("-", "").PadRight(20),
+                    PaymentRefNo3 = d.Reference3 == null ? "".PadRight(20) : d.Reference3.Replace("-", "").PadRight(20),
                     SupplierRefNo = "".PadRight(15),
                     PayType = "C".PadRight(1),
                     PayeeName = d.CustName.PadRight(100),
@@ -147,6 +157,10 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     stringdetail.Add(detailLine);
                 }
 
+                #endregion select detial
+
+                #region select trailer
+
                 //Trailer
                 var trailer = new TrailerChequeResponseDTO
                 {
@@ -170,17 +184,30 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
 
                 var stringTrailer = string.Concat(propstrailer.Select(p => p.GetValue(trailer)?.ToString() ?? ""));
 
+                #endregion select trailer
+
+                //call function insert ป้องกันการ insert ไม่สำเร็จ
+                await using var transaction = await _dBContext.Database.BeginTransactionAsync();
+                try
+                {
+                    var resultId = await InsertBatchControll(tmpCount, amountTotal, req.FileNo, req.BatchNo, req.EffectiveDate, req.UploadDate);
+
+                    await InsertBatchHeader(importClaim, resultId.BatchFileNoId);
+                    await InsertBatchDetail(resultId.BatchFileNoId, header, stringHeader, details, trailer, stringTrailer);
+                    await InsertChequeDetail(resultId, importClaim);
+
+                    await transaction.CommitAsync(); //Commit หลังทำครบทุกเมธอด
+                }
+                catch (Exception e)
+                {
+                    await transaction.RollbackAsync();
+                    throw e;
+                }
                 //add list date to gen file text
                 var finalList = new List<string> { stringHeader };
                 finalList.AddRange(stringdetail);
                 finalList.Add(stringTrailer);
 
-                //call function insert
-                var batchControlId = await InsertBatchControll(tmpCount);
-
-                await InsertBatchHeader(tmpDetail, batchControlId);
-                await InsertBatchDetail(batchControlId, header, stringHeader, details, trailer, stringTrailer);
-                await InsertDetail(batchControlId, tmpDetail);
                 //create file for function
                 var resultBytes = CreateTextFile(finalList);
 
@@ -189,7 +216,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     Data = resultBytes,
                     IsResult = true,
                     Message = "Success",
-                    FileName = $"SSIN EX_Kcorp_ConChq_{fileNo}_{batchNo}_{countTotal}_{amountTotal}.txt"
+                    FileName = $"SSIN EX_Kcorp_ConChq_{effectiveDate}_{req.FileNo}_{req.BatchNo}_{countTotal}_{amountTotal}.txt"
                 };
 
                 return ResponseResult.Success(dataOut);
@@ -259,36 +286,76 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
             return memoryStream.ToArray(); // Return byte[] directly
         }
 
-        private async Task<int> InsertBatchControll(int count)
+        private async Task<InsertBatchControllResponseDTO> InsertBatchControll(int count, decimal? sum, int? fileNo, int? batchNo, DateTime? effectiveDate, DateTime? uploadDate)
         {
             var now = DateTime.Now;
-            await using (var transaction = await _dBContext.Database.BeginTransactionAsync())
+
+            //ตรวจสอบว่าเคยนำเข้ารึยัง
+            var checkControl = await _dBContext.BatchControls
+                .FirstOrDefaultAsync(c => c.IsActive == true && c.FileNo == fileNo);
+
+            int controlId;
+            var controlInsert = new BatchControl();
+
+            if (checkControl == null)
             {
-                try
-                {
-                    var controlInsert = new BatchControl();
+                controlInsert.IsActive = true;
+                controlInsert.ItemCount = count;
+                controlInsert.SumAmount = sum;
+                controlInsert.CreatedDate = now;
+                controlInsert.CreatedByUserId = 1;
+                controlInsert.UpdatedDate = now;
+                controlInsert.UpdatedByUserId = 1;
+                controlInsert.FileNo = fileNo;
+                controlInsert.EffectiveDate = effectiveDate;
 
-                    controlInsert.IsActive = true;
-                    controlInsert.BatchControlType = 1; //in
-                    controlInsert.ItemCount = count;
-                    controlInsert.CreatedDate = now;
-                    controlInsert.CreatedByUserId = 1;
-                    controlInsert.UpdatedDate = now;
-                    controlInsert.UpdatedByUserId = 1;
-
-                    _dBContext.Add(controlInsert);
-                    await _dBContext.SaveChangesAsync();
-                    var controlId = controlInsert.BatchControlId;
-                    await transaction.CommitAsync();
-
-                    return controlId;
-                }
-                catch (Exception e)
-                {
-                    await transaction.RollbackAsync();
-                    throw e;
-                }
+                _dBContext.Add(controlInsert);
+                await _dBContext.SaveChangesAsync();
             }
+            else
+            {
+                if (checkControl.ItemCount > 10000)
+                    throw new Exception($"FileNo: {fileNo} insert is completed. ");
+
+                var checkBatch = await _dBContext.BatchFileNos.FirstOrDefaultAsync(b => b.IsActive == true && b.BatchControlId == checkControl.BatchControlId && b.BatchNo == batchNo);
+                if (checkBatch != null)
+                    throw new Exception($"FileNo: {fileNo} , BatchNo: {batchNo} is duplicate.");
+
+                //update
+                checkControl.ItemCount += count;
+                checkControl.SumAmount += sum;
+                checkControl.UpdatedDate = now;
+                checkControl.UpdatedByUserId = 1;
+
+                _dBContext.Update(checkControl);
+            }
+
+            controlId = checkControl == null ? controlInsert.BatchControlId
+                        : checkControl.BatchControlId;
+
+            //insert batch file no
+            BatchFileNo batchFileNo = new();
+            batchFileNo.IsActive = true;
+            batchFileNo.BatchControlId = controlId;
+            batchFileNo.BatchNo = batchNo;
+            batchFileNo.ItemCount = count;
+            batchFileNo.SumAmount = sum; //todo
+            batchFileNo.UploadDate = uploadDate;
+            batchFileNo.CreatedDate = now;
+            batchFileNo.CreatedByUserId = 1;
+            batchFileNo.UpdatedDate = now;
+            batchFileNo.UpdatedByUserId = 1;
+
+            _dBContext.Add(batchFileNo);
+
+            await _dBContext.SaveChangesAsync();
+            var batchFileNoId = batchFileNo.BatchFileNoId;
+
+            return new InsertBatchControllResponseDTO
+            {
+                BatchControlId = controlId,
+                BatchFileNoId = batchFileNoId
+            };
         }
 
         private async Task InsertBatchHeader(List<TmpImportClaim> data, int id)
@@ -305,142 +372,108 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                                 }
                                 ).ToList();
 
-            await using (var transaction = await _dBContext.Database.BeginTransactionAsync())
+            List<BatchHeader> batchHeaders = new();
+
+            foreach (var item in tmpHeader)
             {
-                try
-                {
-                    List<BatchHeader> batchHeaders = new();
+                BatchHeader headerInsert = new();
+                headerInsert.BatchFileNoId = id;
+                headerInsert.AppId = item.Key;
+                headerInsert.ItemCount = item.Value.ItemCount;
+                headerInsert.SumAmount = item.Value.PayTotal;
+                headerInsert.IsActive = true;
+                headerInsert.CreatedDate = now;
+                headerInsert.CreatedByUserId = 1;
+                headerInsert.UpdatedDate = now;
+                headerInsert.UpdatedByUserId = 1;
 
-                    foreach (var item in tmpHeader)
-                    {
-                        BatchHeader headerInsert = new();
-                        headerInsert.BatchControlId = id;
-                        headerInsert.AppId = item.Key;
-                        headerInsert.ItemCount = item.Value.ItemCount;
-                        headerInsert.SumAmount = item.Value.PayTotal;
-                        headerInsert.IsActive = true;
-                        headerInsert.CreatedDate = now;
-                        headerInsert.CreatedByUserId = 1;
-                        headerInsert.UpdatedDate = now;
-                        headerInsert.UpdatedByUserId = 1;
-
-                        batchHeaders.Add(headerInsert);
-                    }
-                    _dBContext.BatchHeaders.AddRange(batchHeaders);
-                    await _dBContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception e)
-                {
-                    await transaction.RollbackAsync();
-                    throw e;
-                }
+                batchHeaders.Add(headerInsert);
             }
+            _dBContext.BatchHeaders.AddRange(batchHeaders);
+            await _dBContext.SaveChangesAsync();
         }
 
         private async Task InsertBatchDetail(int id, HeaderChequeResponseDTO header, string headerString, List<DetailChequeResponseDTO> listDetail, TrailerChequeResponseDTO footer, string footerString)
         {
             var now = DateTime.Now;
-            await using (var transaction = await _dBContext.Database.BeginTransactionAsync())
+
+            var finalBatchDetail = new List<BatchDetail>();
+            //insert header
+            var mapHeader = _mapper.Map<BatchDetail>(header);
+            mapHeader.BatchFileNoId = id;
+            mapHeader.IsActive = true;
+            mapHeader.CreatedDate = now;
+            mapHeader.CreatedByUserId = 1;
+            mapHeader.UpdatedDate = now;
+            mapHeader.UpdatedByUserId = 1;
+            mapHeader.DataType = "H";
+            mapHeader.BatchData = headerString;
+
+            finalBatchDetail.Add(mapHeader);
+
+            //insert loop detail
+            foreach (var item in listDetail)
             {
-                try
-                {
-                    var finalBatchDetail = new List<BatchDetail>();
-                    //insert header
-                    var mapHeader = _mapper.Map<BatchDetail>(header);
-                    mapHeader.BatchControlId = id;
-                    mapHeader.IsActive = true;
-                    mapHeader.CreatedDate = now;
-                    mapHeader.CreatedByUserId = 1;
-                    mapHeader.UpdatedDate = now;
-                    mapHeader.UpdatedByUserId = 1;
-                    mapHeader.DataType = "H";
-                    mapHeader.BatchData = headerString;
+                var propsdetail = item.GetType()
+                                .GetProperties()
+                                .OrderBy(p => p.MetadataToken);
+                var detailLine = string.Concat(propsdetail.Select(p => p.GetValue(item)));
 
-                    finalBatchDetail.Add(mapHeader);
+                var mapBatchDetail = _mapper.Map<BatchDetail>(item);
 
-                    //var trimListDetail = listDetail.TrimExcess();
-                    //insert loop detail
-                    foreach (var item in listDetail)
-                    {
-                        var propsdetail = item.GetType()
-                                        .GetProperties()
-                                        .OrderBy(p => p.MetadataToken);
-                        var detailLine = string.Concat(propsdetail.Select(p => p.GetValue(item)));
+                mapBatchDetail.BatchFileNoId = id;
+                mapBatchDetail.IsActive = true;
+                mapBatchDetail.CreatedDate = now;
+                mapBatchDetail.CreatedByUserId = 1;
+                mapBatchDetail.UpdatedDate = now;
+                mapBatchDetail.UpdatedByUserId = 1;
+                mapBatchDetail.DataType = "D";
+                mapBatchDetail.BatchData = detailLine;
 
-                        var mapBatchDetail = _mapper.Map<BatchDetail>(item);
-
-                        mapBatchDetail.BatchControlId = id;
-                        mapBatchDetail.IsActive = true;
-                        mapBatchDetail.CreatedDate = now;
-                        mapBatchDetail.CreatedByUserId = 1;
-                        mapBatchDetail.UpdatedDate = now;
-                        mapBatchDetail.UpdatedByUserId = 1;
-                        mapBatchDetail.DataType = "D";
-                        mapBatchDetail.BatchData = detailLine;
-
-                        finalBatchDetail.Add(mapBatchDetail);
-                    }
-                    //insert trailer
-                    var mapTrailer = _mapper.Map<BatchDetail>(footer);
-                    mapTrailer.BatchControlId = id;
-                    mapTrailer.IsActive = true;
-                    mapTrailer.CreatedDate = now;
-                    mapTrailer.CreatedByUserId = 1;
-                    mapTrailer.UpdatedDate = now;
-                    mapTrailer.UpdatedByUserId = 1;
-                    mapTrailer.DataType = "F";
-                    mapTrailer.BatchData = footerString;
-
-                    finalBatchDetail.Add(mapTrailer);
-
-                    _dBContext.BatchDetails.AddRange(finalBatchDetail);
-
-                    await _dBContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception e)
-                {
-                    await transaction.RollbackAsync();
-                    throw e;
-                }
+                finalBatchDetail.Add(mapBatchDetail);
             }
+            //insert trailer
+            var mapTrailer = _mapper.Map<BatchDetail>(footer);
+            mapTrailer.BatchFileNoId = id;
+            mapTrailer.IsActive = true;
+            mapTrailer.CreatedDate = now;
+            mapTrailer.CreatedByUserId = 1;
+            mapTrailer.UpdatedDate = now;
+            mapTrailer.UpdatedByUserId = 1;
+            mapTrailer.DataType = "F";
+            mapTrailer.BatchData = footerString;
+
+            finalBatchDetail.Add(mapTrailer);
+
+            _dBContext.BatchDetails.AddRange(finalBatchDetail);
+
+            await _dBContext.SaveChangesAsync();
         }
 
-        private async Task InsertDetail(int id, List<TmpImportClaim> data)
+        private async Task InsertChequeDetail(InsertBatchControllResponseDTO id, List<TmpImportClaim> data)
         {
-            await using (var transaction = await _dBContext.Database.BeginTransactionAsync())
-            {
-                var now = DateTime.Now;
-                try
-                {
-                    List<Detail> finalDetail = new();
-                    foreach (var item in data)
-                    {
-                        Detail mapDetail = new();
-                        //insert detail
-                        mapDetail.BatchControlId = id;
-                        mapDetail.AppId = item.ApplicationCode;
-                        mapDetail.ClaimNo = item.ClaimNo;
-                        mapDetail.Prefix = $"{item.ApplicationCode}{item.seqNo.ToString().PadLeft(4, '0')}";
-                        mapDetail.IsActive = true;
-                        mapDetail.CreatedDate = now;
-                        mapDetail.CreatedByUserId = 1;
-                        mapDetail.UpdatedDate = now;
-                        mapDetail.UpdatedByUserId = 1;
+            var now = DateTime.Now;
 
-                        finalDetail.Add(mapDetail);
-                    }
-                    _dBContext.Details.AddRange(finalDetail);
-                    await _dBContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception e)
-                {
-                    await transaction.RollbackAsync();
-                    throw e;
-                }
+            List<ChequeDetail> finalDetail = new();
+            foreach (var item in data)
+            {
+                ChequeDetail mapDetail = new();
+                //insert detail
+                mapDetail.BatchControlId = id.BatchControlId;
+                mapDetail.AppId = item.ApplicationCode;
+                mapDetail.ClaimNo = item.ClaimNo;
+                mapDetail.Prefix = $"{item.ApplicationCode}{item.SeqNo.ToString().PadLeft(4, '0')}";
+                mapDetail.IsActive = true;
+                mapDetail.CreatedDate = now;
+                mapDetail.CreatedByUserId = 1;
+                mapDetail.UpdatedDate = now;
+                mapDetail.UpdatedByUserId = 1;
+                mapDetail.BatchFileNoId = id.BatchFileNoId;
+
+                finalDetail.Add(mapDetail);
             }
+            _dBContext.ChequeDetails.AddRange(finalDetail);
+            await _dBContext.SaveChangesAsync();
         }
 
         #endregion Function

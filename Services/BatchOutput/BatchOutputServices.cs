@@ -98,7 +98,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
             var batchControlInsert = new BatchControl
             {
                 ItemCount = detailLines.Count,
-                BatchControlType = 2, // 2 out
+                //BatchControlType = 2, // 2 out
                 IsActive = true,
                 CreatedByUserId = 1,
                 CreatedDate = DateTime.Now,
@@ -125,7 +125,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     int batchControlId = batchControlInsert.BatchControlId;
 
                     _dBContext.BatchOutPutDetails.Add(headerInsert);
-                    headerInsert.BatchControlId = batchControlId; // Set foreign key
+                    //headerInsert.BatchControlId = batchControlId; // Set foreign key
                     headerInsert.DataType = "H"; // Set record type for header
                     headerInsert.IsActive = true;
                     headerInsert.CreatedByUserId = 1;
@@ -136,7 +136,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     _dBContext.BatchOutPutDetails.AddRange(detailInsert);
                     foreach (var detail in detailInsert)
                     {
-                        detail.BatchControlId = batchControlId; // Set foreign key
+                        //detail.BatchControlId = batchControlId; // Set foreign key
                         detail.DataType = "D"; // Set record type for detail
                         detail.IsActive = true;
                         detail.CreatedByUserId = 1;
@@ -146,7 +146,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     }
 
                     _dBContext.BatchOutPutDetails.AddRange(footerInsert);
-                    footerInsert.BatchControlId = batchControlId; // Set foreign key
+                    //footerInsert.BatchControlId = batchControlId; // Set foreign key
                     footerInsert.DataType = "F"; // Set record type for footer
                     footerInsert.IsActive = true;
                     footerInsert.CreatedByUserId = 1;
