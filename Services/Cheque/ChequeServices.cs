@@ -49,7 +49,10 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                     tmpDetail = tmpDetail.Where(b => b.BatchNo == req.BatchNo);
 
                 //select data to insert
-                var importClaim = await tmpDetail.OrderByDescending(a => a.ApplicationCode).ThenBy(a => a.SeqNo).AsNoTracking().ToListAsync();
+                var importClaim = await tmpDetail
+                    .OrderBy(a => a.SchoolRunning)
+                    .ThenBy(a => a.SeqNo)
+                    .AsNoTracking().ToListAsync();
 
                 if (importClaim.Count == 0)
                     throw new Exception("Data import detail Not found.");

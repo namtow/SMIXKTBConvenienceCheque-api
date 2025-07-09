@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SMIXKTBConvenienceCheque.Data;
 using SMIXKTBConvenienceCheque.DTOs.BatchOutput;
 using SMIXKTBConvenienceCheque.Models;
 using System.Data;
+using System.Globalization;
 using System.Text;
 
 namespace SMIXKTBConvenienceCheque.Services.BatchOutput
@@ -31,6 +33,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
         public async Task<BatchOutputInsertResponseDTO> BatchOutputInsert(BatchOutputInsertRequestDTO intput)
         {
             string filePath = intput.path;//@"D:\SMIxKTP_Change\DWN_SSIN133344_SSIN_Status-Change_202507040132 v2.txt";
+            string fileName = Path.GetFileName(filePath);
 
             Encoding encoding = Encoding.GetEncoding("windows-874"); // ANSI ภาษาไทย
 
@@ -95,15 +98,16 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                 }
             }
 
-            var batchControlInsert = new BatchControl
+            var batchOutPutHeaderInsert = new BatchOutPutHeader
             {
                 ItemCount = detailLines.Count,
-                //BatchControlType = 2, // 2 out
+                SumAmount = detailLines.Sum(d => decimal.TryParse(d.NetCheque, out var amount) ? amount : 0),
                 IsActive = true,
                 CreatedByUserId = 1,
                 CreatedDate = DateTime.Now,
                 UpdatedByUserId = 1,
                 UpdatedDate = DateTime.Now,
+                FileName = fileName,
             };
 
             var headerInsert = _mapper.Map<BatchOutPutDetail>(headerLine);
@@ -120,12 +124,12 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                 try
                 {
                     // Insert BatchControl
-                    _dBContext.BatchControls.Add(batchControlInsert);
+                    _dBContext.BatchOutPutHeaders.Add(batchOutPutHeaderInsert);
                     await _dBContext.SaveChangesAsync();
-                    int batchControlId = batchControlInsert.BatchControlId;
+                    int batchOutPutHeaderId = batchOutPutHeaderInsert.BatchOutPutHeaderId;
 
                     _dBContext.BatchOutPutDetails.Add(headerInsert);
-                    //headerInsert.BatchControlId = batchControlId; // Set foreign key
+                    headerInsert.BatchOutPutHeaderId = batchOutPutHeaderId; // Set foreign key
                     headerInsert.DataType = "H"; // Set record type for header
                     headerInsert.IsActive = true;
                     headerInsert.CreatedByUserId = 1;
@@ -136,7 +140,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     _dBContext.BatchOutPutDetails.AddRange(detailInsert);
                     foreach (var detail in detailInsert)
                     {
-                        //detail.BatchControlId = batchControlId; // Set foreign key
+                        detail.BatchOutPutHeaderId = batchOutPutHeaderId; // Set foreign key
                         detail.DataType = "D"; // Set record type for detail
                         detail.IsActive = true;
                         detail.CreatedByUserId = 1;
@@ -146,7 +150,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     }
 
                     _dBContext.BatchOutPutDetails.AddRange(footerInsert);
-                    //footerInsert.BatchControlId = batchControlId; // Set foreign key
+                    footerInsert.BatchOutPutHeaderId = batchOutPutHeaderId; // Set foreign key
                     footerInsert.DataType = "F"; // Set record type for footer
                     footerInsert.IsActive = true;
                     footerInsert.CreatedByUserId = 1;
@@ -154,9 +158,47 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     footerInsert.UpdatedByUserId = 1;
                     footerInsert.UpdatedDate = DateTime.Now;
 
-                    // Insert BatchOutPutDetails
-                    await _dBContext.SaveChangesAsync();
+                    //Match file to insert
+                    var detailOutputCount = detailInsert.Count;
+                    var prefixOutPut = detailInsert.Select(p => p.PaymentRefNo1).ToList();
 
+                    var tmpDetialInsert = await _dBContext.ChequeDetails.Where(q => q.IsActive == true && prefixOutPut.Contains(q.Prefix)).ToListAsync();
+                    var detailCount = tmpDetialInsert.Count;
+
+                    //ตรวจสอบจำนวน ไฟล์
+                    if (detailCount != detailOutputCount)
+                        throw new Exception("ไม่สามารถนำเข้าไฟล์ได้ เนื่องจาก จำนวน Batch ไม่เท่ากัน");
+
+                    string[] formats = { "ddMMyyyy", "yyyy-MM-dd" };
+
+                    // Insert BatchOutPutDetails
+                    foreach (var detail in tmpDetialInsert)
+                    {
+                        var tmpOutPut = detailInsert.FirstOrDefault(d => d.PaymentRefNo1 == detail.Prefix);
+                        if (tmpOutPut == null) throw new Exception("Data not found");
+
+                        detail.ChequeEffectiveDate = string.IsNullOrEmpty(tmpOutPut?.ChequeEffectiveDate)
+                                                    ? null
+                                                    : DateTime.ParseExact(tmpOutPut.ChequeEffectiveDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        detail.ChequeNumber = tmpOutPut?.ChequeNumber;
+                        detail.NetCheque = string.IsNullOrEmpty(tmpOutPut?.NetCheque) ? 0 : Convert.ToDecimal(tmpOutPut?.NetCheque);
+                        detail.PayeeName = tmpOutPut?.PayeeName;
+                        detail.WithholdingTaxAmount = string.IsNullOrEmpty(tmpOutPut?.WithholdingTaxAmount) ? 0 : Convert.ToDecimal(tmpOutPut?.WithholdingTaxAmount);
+                        detail.ChequeStatus = tmpOutPut?.ChequeStatus;
+                        detail.TransactionDate = string.IsNullOrEmpty(tmpOutPut?.TransactionDate)
+                                                    ? null
+                                                    : DateTime.ParseExact(tmpOutPut.TransactionDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        detail.OutwardDate = string.IsNullOrEmpty(tmpOutPut?.OutwardDate)
+                                                    ? null
+                                                    : DateTime.ParseExact(tmpOutPut.OutwardDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+
+                        detail.UpdatedDate = DateTime.Now;
+                        detail.UpdatedByUserId = 1;
+
+                        _dBContext.ChequeDetails.Update(detail);
+                    }
+
+                    await _dBContext.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
                 catch (Exception e)
