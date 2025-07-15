@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
+using SMIXKTBConvenienceCheque.Configurations;
 using SMIXKTBConvenienceCheque.Data;
 using SMIXKTBConvenienceCheque.DTOs.BatchOutput;
 using SMIXKTBConvenienceCheque.Models;
@@ -14,13 +16,15 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
     {
         private readonly AppDBContext _dBContext;
         private readonly IMapper _mapper;
+        private readonly IOptions<ChequeSetting> _cheuqeSetting;
         private readonly Serilog.ILogger _logger;
         private readonly string _serviceName = nameof(BatchOutputServices);
 
-        public BatchOutputServices(AppDBContext dBContext, IMapper mapper)
+        public BatchOutputServices(AppDBContext dBContext, IMapper mapper, IOptions<ChequeSetting> cheuqeSetting)
         {
             _dBContext = dBContext;
             _mapper = mapper;
+            _cheuqeSetting = cheuqeSetting;
             _logger = Log.ForContext<BatchOutputServices>();
         }
 
@@ -30,10 +34,11 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
         /// <returns>
         /// A <see cref="ServiceResponse{BatchOutputInsertResponseDTO}"/> containing the result of the operation.
         /// </returns>
-        public async Task<BatchOutputInsertResponseDTO> BatchOutputInsert(BatchOutputInsertRequestDTO intput)
+        public async Task<BatchOutputInsertResponseDTO> BatchOutputInsert(BatchOutputInsertRequestDTO input)
         {
-            string filePath = intput.path;//@"D:\SMIxKTP_Change\DWN_SSIN133344_SSIN_Status-Change_202507040132 v2.txt";
-            string fileName = Path.GetFileName(filePath);
+            string filePathName = _cheuqeSetting.Value.Path + input.FileName;
+            //string filePath = input.FileName;//@"D:\SMIxKTP_Change\DWN_SSIN133344_SSIN_Status-Change_202507040132 v2.txt";
+            string fileName = Path.GetFileName(filePathName);
 
             //ตรวจสอบชื่อไฟล์ นำเข้าซ้ำ
             var fileNameCheuqe = await _dBContext.BatchOutPutHeaders.FirstOrDefaultAsync(h => h.IsActive == true && h.FileName == fileName);
@@ -50,7 +55,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
             // ตรวจสอบ error
             List<string> errorList = new List<string>();
 
-            string[] allLines = File.ReadAllLines(filePath, encoding);
+            string[] allLines = File.ReadAllLines(filePathName, encoding);
 
             for (int i = 0; i < allLines.Length; i++)
             {

@@ -37,6 +37,7 @@ namespace SMIXKTBConvenienceCheque
             // services.Configure<ServiceURL>(configuration.GetSection("ServiceURL"));
             // services.AddSingleton<ShortLinkClient>();
             // services.AddSingleton<SendSmsClient>();
+            services.Configure<ChequeSetting>(configuration.GetSection("ChequeSetting"));
 
             return services;
         }
