@@ -210,6 +210,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 }
                 catch (Exception e)
                 {
+                    _logger.Error(e, "[{FunctionName}] - Error occurred during transaction", methodName);
                     await transaction.RollbackAsync();
                     throw e;
                 }
@@ -485,7 +486,7 @@ namespace SMIXKTBConvenienceCheque.Services.Cheque
                 mapDetail.BatchControlId = id.BatchControlId;
                 mapDetail.AppId = item.ApplicationCode;
                 mapDetail.ClaimNo = item.ClaimNo;
-                mapDetail.Prefix = $"{item.ApplicationCode}{item.SeqNo.ToString().PadLeft(4, '0')}";
+                mapDetail.Prefix = $"{item.SchoolRunning}{item.SeqNo.ToString().PadLeft(4, '0')}";
                 mapDetail.IsActive = true;
                 mapDetail.CreatedDate = now;
                 mapDetail.CreatedByUserId = 1;

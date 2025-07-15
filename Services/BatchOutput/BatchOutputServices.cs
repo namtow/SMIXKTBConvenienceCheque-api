@@ -35,6 +35,11 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
             string filePath = intput.path;//@"D:\SMIxKTP_Change\DWN_SSIN133344_SSIN_Status-Change_202507040132 v2.txt";
             string fileName = Path.GetFileName(filePath);
 
+            //ตรวจสอบชื่อไฟล์ นำเข้าซ้ำ
+            var fileNameCheuqe = await _dBContext.BatchOutPutHeaders.FirstOrDefaultAsync(h => h.IsActive == true && h.FileName == fileName);
+            if (fileNameCheuqe != null)
+                throw new Exception("File name is Duplicate.");
+
             Encoding encoding = Encoding.GetEncoding("windows-874"); // ANSI ภาษาไทย
 
             // แยกข้อมูล
@@ -174,8 +179,9 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     // Insert BatchOutPutDetails
                     foreach (var detail in tmpDetialInsert)
                     {
-                        var tmpOutPut = detailInsert.FirstOrDefault(d => d.PaymentRefNo1 == detail.Prefix);
-                        if (tmpOutPut == null) throw new Exception("Data not found");
+                        var prefixCode = detail.Prefix;
+                        var tmpOutPut = detailInsert.FirstOrDefault(d => d.PaymentRefNo1 == prefixCode && d.IsActive == true);
+                        if (tmpOutPut == null) throw new Exception($"Prefix: {prefixCode} is not found");
 
                         detail.ChequeEffectiveDate = string.IsNullOrEmpty(tmpOutPut?.ChequeEffectiveDate)
                                                     ? null
