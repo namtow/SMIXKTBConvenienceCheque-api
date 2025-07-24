@@ -45,6 +45,10 @@
       {
          "Name": "[dbo].[TmpImportClaim]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[usp_ReportCheque_Select]",
+         "ObjectType": 1
       }
    ],
    "UiHint": null,

@@ -356,6 +356,7 @@ namespace SMIXKTBConvenienceCheque.Data
                     .HasConstraintName("FK_ChequeDetail_BatchControl");
             });
 
+            OnModelCreatingGeneratedProcedures(modelBuilder);
             OnModelCreatingPartial(modelBuilder);
         }
 
