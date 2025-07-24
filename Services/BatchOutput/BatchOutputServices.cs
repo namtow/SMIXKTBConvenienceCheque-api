@@ -37,7 +37,6 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
         public async Task<BatchOutputInsertResponseDTO> BatchOutputInsert(BatchOutputInsertRequestDTO input)
         {
             string filePathName = _cheuqeSetting.Value.Path + input.FileName;
-            //string filePath = input.FileName;//@"D:\SMIxKTP_Change\DWN_SSIN133344_SSIN_Status-Change_202507040132 v2.txt";
             string fileName = Path.GetFileName(filePathName);
 
             //ตรวจสอบชื่อไฟล์ นำเข้าซ้ำ

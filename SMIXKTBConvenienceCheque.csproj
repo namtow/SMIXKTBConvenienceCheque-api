@@ -38,6 +38,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.35" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.16" />
 		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
+		<PackageReference Include="NPOI" Version="2.6.2" />
 		<PackageReference Include="Quartz.Extensions.Hosting" Version="3.6.2" />
 		<PackageReference Include="RestSharp" Version="109.0.1" />
 		<PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="109.0.1" />
