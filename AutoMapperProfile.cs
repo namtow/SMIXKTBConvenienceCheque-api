@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SMIXKTBConvenienceCheque.DTOs.BatchOutput;
 using SMIXKTBConvenienceCheque.DTOs.Cheque;
+using SMIXKTBConvenienceCheque.DTOs.Report;
 using SMIXKTBConvenienceCheque.Models;
 
 namespace SMIXKTBConvenienceCheque
@@ -24,6 +25,8 @@ namespace SMIXKTBConvenienceCheque
                 .BeforeMap((src, dest) => TrimAllStringProperties(src));
             CreateMap<TrailerChequeResponseDTO, BatchDetail>().ReverseMap()
                 .BeforeMap((src, dest) => TrimAllStringProperties(src));
+
+            CreateMap<ChequeReportResponseDTO, usp_ReportCheque_SelectResult>().ReverseMap();
         }
 
         private static object TrimString(object value)

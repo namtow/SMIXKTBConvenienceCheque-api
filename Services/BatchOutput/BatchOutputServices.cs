@@ -36,6 +36,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
         /// </returns>
         public async Task<BatchOutputInsertResponseDTO> BatchOutputInsert(BatchOutputInsertRequestDTO input)
         {
+            var methodName = nameof(BatchOutputInsert);
             string filePathName = _cheuqeSetting.Value.Path + input.FileName;
             string fileName = Path.GetFileName(filePathName);
 
@@ -170,44 +171,54 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                     //Match file to insert
                     var detailOutputCount = detailInsert.Count;
                     var prefixOutPut = detailInsert.Select(p => p.PaymentRefNo1).ToList();
+                    var tmpDetialInsert = _dBContext.ChequeDetails.AsNoTracking();
+                    //var tmpDetialInsert = await _dBContext.ChequeDetails.Where(q => q.IsActive == true && prefixOutPut.Contains(q.Prefix))
+                    //    .AsNoTracking().ToListAsync();
 
-                    var tmpDetialInsert = await _dBContext.ChequeDetails.Where(q => q.IsActive == true && prefixOutPut.Contains(q.Prefix)).ToListAsync();
-                    var detailCount = tmpDetialInsert.Count;
+                    //var detailCount = tmpDetialInsert.Count;
 
-                    //ตรวจสอบจำนวน ไฟล์
-                    if (detailCount != detailOutputCount)
-                        throw new Exception("ไม่สามารถนำเข้าไฟล์ได้ เนื่องจาก จำนวน Batch ไม่เท่ากัน");
+                    ////ตรวจสอบจำนวน ไฟล์
+                    //if (detailCount != detailOutputCount)
+                    //    throw new Exception("ไม่สามารถนำเข้าไฟล์ได้ เนื่องจาก จำนวน Batch ไม่เท่ากัน");
 
                     string[] formats = { "ddMMyyyy", "yyyy-MM-dd" };
-
+                    int countSuccess = 0;
+                    int countFail = 0;
                     // Insert BatchOutPutDetails
-                    foreach (var detail in tmpDetialInsert)
+                    foreach (var detail in detailInsert)
                     {
-                        var prefixCode = detail.Prefix;
-                        var tmpOutPut = detailInsert.FirstOrDefault(d => d.PaymentRefNo1 == prefixCode && d.IsActive == true);
-                        if (tmpOutPut == null) throw new Exception($"Prefix: {prefixCode} is not found");
+                        var prefixCode = detail.PaymentRefNo1;
+                        var tmpOutPut = tmpDetialInsert.FirstOrDefault(d => d.Prefix == prefixCode && d.IsActive == true);
 
-                        detail.ChequeEffectiveDate = string.IsNullOrEmpty(tmpOutPut?.ChequeEffectiveDate)
-                                                    ? null
-                                                    : DateTime.ParseExact(tmpOutPut.ChequeEffectiveDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
-                        detail.ChequeNumber = tmpOutPut?.ChequeNumber;
-                        detail.NetCheque = string.IsNullOrEmpty(tmpOutPut?.NetCheque) ? 0 : Convert.ToDecimal(tmpOutPut?.NetCheque);
-                        detail.PayeeName = tmpOutPut?.PayeeName;
-                        detail.WithholdingTaxAmount = string.IsNullOrEmpty(tmpOutPut?.WithholdingTaxAmount) ? 0 : Convert.ToDecimal(tmpOutPut?.WithholdingTaxAmount);
-                        detail.ChequeStatus = tmpOutPut?.ChequeStatus;
-                        detail.TransactionDate = string.IsNullOrEmpty(tmpOutPut?.TransactionDate)
-                                                    ? null
-                                                    : DateTime.ParseExact(tmpOutPut.TransactionDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
-                        detail.OutwardDate = string.IsNullOrEmpty(tmpOutPut?.OutwardDate)
-                                                    ? null
-                                                    : DateTime.ParseExact(tmpOutPut.OutwardDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        if (tmpOutPut != null)//throw new Exception($"Prefix: {prefixCode} is not found");
+                        {
+                            tmpOutPut.ChequeEffectiveDate = string.IsNullOrEmpty(detail?.ChequeEffectiveDate)
+                                                  ? null
+                                                  : DateTime.ParseExact(detail.ChequeEffectiveDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+                            tmpOutPut.ChequeNumber = tmpOutPut?.ChequeNumber;
+                            tmpOutPut.NetCheque = string.IsNullOrEmpty(detail?.NetCheque) ? 0 : Convert.ToDecimal(detail?.NetCheque);
+                            tmpOutPut.PayeeName = detail?.PayeeName;
+                            tmpOutPut.WithholdingTaxAmount = string.IsNullOrEmpty(detail?.WithholdingTaxAmount) ? 0 : Convert.ToDecimal(detail?.WithholdingTaxAmount);
+                            tmpOutPut.ChequeStatus = detail?.ChequeStatus;
+                            tmpOutPut.TransactionDate = string.IsNullOrEmpty(detail?.TransactionDate)
+                                                  ? null
+                                                  : DateTime.ParseExact(detail.TransactionDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
+                            tmpOutPut.OutwardDate = string.IsNullOrEmpty(detail?.OutwardDate)
+                                                  ? null
+                                                  : DateTime.ParseExact(detail.OutwardDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
 
-                        detail.UpdatedDate = DateTime.Now;
-                        detail.UpdatedByUserId = 1;
+                            tmpOutPut.UpdatedDate = DateTime.Now;
+                            tmpOutPut.UpdatedByUserId = 1;
+                            countSuccess++;
 
-                        _dBContext.ChequeDetails.Update(detail);
+                            _dBContext.ChequeDetails.Update(tmpOutPut);
+                        }
+                        else
+                        {
+                            countFail++;
+                        }
                     }
-
+                    _logger.Information("[{ServiceName}][{MethodName}] - Insert success count: {CountSuccess} , Fail: {CountFail}", _serviceName, methodName, countSuccess, countFail);
                     await _dBContext.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }

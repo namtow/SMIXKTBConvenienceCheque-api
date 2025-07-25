@@ -8,6 +8,7 @@ using MassTransit.ExtensionsDependencyInjectionIntegration;
 using Quartz;
 using SMIXKTBConvenienceCheque.Services.Cheque;
 using SMIXKTBConvenienceCheque.Services.BatchOutput;
+using SMIXKTBConvenienceCheque.Services.Report;
 
 namespace SMIXKTBConvenienceCheque
 {
@@ -24,6 +25,7 @@ namespace SMIXKTBConvenienceCheque
             services.AddScoped<ILoginDetailServices, LoginDetailServices>();
             services.AddScoped<IChequeServices, ChequeServices>();
             services.AddScoped<IBatchOutputServices, BatchOutputServices>();
+            services.AddScoped<IReportServices, ReportServices>();
             // TODO: เมื่อเขียน Service และ Interface ของ Service ให้ใส่ที่นี้
             // services.AddSingleton // ใช้เมื่อใช้ Instance เดียวทั้ง Project
             // services.AddScoped // ใช้เมื่อแยก Instance ตาม User
