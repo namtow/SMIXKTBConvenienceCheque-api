@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using SMIXKTBConvenienceCheque.DTOs.Report;
 using SMIXKTBConvenienceCheque.Services.Report;
 
 namespace SMIXKTBConvenienceCheque.Controllers.Report
 {
+    [Authorize(Policy = Permission.Base)]
     [Route("api/[controller]")]
     [ApiController]
     public class ReportController : ControllerBase

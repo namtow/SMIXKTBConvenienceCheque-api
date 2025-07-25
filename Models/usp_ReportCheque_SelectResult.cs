@@ -9,7 +9,6 @@ namespace SMIXKTBConvenienceCheque.Models
     {
         public int? FileNo { get; set; }
         public int? BatchNo { get; set; }
-        public DateTime? UploadDate { get; set; }
         public string ClaimNo { get; set; }
         public string Prefix { get; set; }
         public string SchoolRunning { get; set; }
