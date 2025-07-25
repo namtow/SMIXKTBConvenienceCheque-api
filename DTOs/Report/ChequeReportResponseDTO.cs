@@ -15,5 +15,6 @@
         public string ChequeStatus { get; set; }
         public string ChequeStatusDetail { get; set; }
         public DateTime? TransactionDate { get; set; }
+        public DateTime? OutwardDate { get; set; }
     }
 }
