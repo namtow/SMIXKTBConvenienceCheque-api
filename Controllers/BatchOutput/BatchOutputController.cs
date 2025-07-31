@@ -36,7 +36,28 @@ namespace SMIXKTBConvenienceCheque.Controllers.BatchOutput
             }
             catch (Exception e)
             {
-                _logger.Error(e, "[{ControllerName}][GetRightsStatus] - An error occurred , {Msg}", _controllerName, e.Message);
+                _logger.Error(e, "[{ControllerName}][{MethodName}] - An error occurred , {Msg}", _controllerName, methodName, e.Message);
+                return ResponseResult.Failure<BatchOutputInsertResponseDTO>(e.Message);
+            }
+        }
+
+        /// <summary>
+        ///  Upload file to backup
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost("uploadfile")]
+        public async Task<ServiceResponse<BatchOutputInsertResponseDTO>> UploadFileBackupBatchOutput([FromForm] UpsertBatchFileNoUpload input)
+        {
+            var methodName = nameof(UploadFileBackupBatchOutput);
+            try
+            {
+                var res = await _service.UploadFileBackupBatchOutput(input);
+                return ResponseResult.Success(res, "Success");
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "[{ControllerName}][{MethodName}] - An error occurred , {Msg}", _controllerName, methodName, e.Message);
                 return ResponseResult.Failure<BatchOutputInsertResponseDTO>(e.Message);
             }
         }
