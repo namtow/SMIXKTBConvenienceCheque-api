@@ -265,6 +265,10 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
             //set path
             var fullBackupPath = Path.Combine(pathBackup, fileNameBackup);
 
+            //ตรวจสอบว่าเคย backup หรือยัง
+            if (File.Exists(fullBackupPath))
+                throw new Exception("File already exists in the backup directory.");
+
             // บันทึกไฟล์ลง disk
             using (var stream = new FileStream(fullBackupPath, FileMode.Create))
             {
