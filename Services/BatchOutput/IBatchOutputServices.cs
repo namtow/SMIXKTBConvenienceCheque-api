@@ -6,6 +6,8 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
     {
         Task<BatchOutputInsertResponseDTO> BatchOutputInsert(BatchOutputInsertRequestDTO intput);
 
+        Task<GetBatchOutputHeaderResponseDTO> GetBatchOutputHeader();
+
         Task<BatchOutputInsertResponseDTO> UploadFileBackupBatchOutput(UpsertBatchFileNoUpload input);
     }
 }

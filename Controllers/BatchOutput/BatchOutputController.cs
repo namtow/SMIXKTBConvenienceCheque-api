@@ -61,5 +61,21 @@ namespace SMIXKTBConvenienceCheque.Controllers.BatchOutput
                 return ResponseResult.Failure<BatchOutputInsertResponseDTO>(e.Message);
             }
         }
+
+        [HttpGet("batchheader")]
+        public async Task<ServiceResponse<GetBatchOutputHeaderResponseDTO>> GetBatchOutputHeader()
+        {
+            var methodName = nameof(GetBatchOutputHeader);
+            try
+            {
+                var res = await _service.GetBatchOutputHeader();
+                return ResponseResult.Success(res, "Success");
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "[{ControllerName}][{MethodName}] - An error occurred , {Msg}", _controllerName, methodName, e.Message);
+                return ResponseResult.Failure<GetBatchOutputHeaderResponseDTO>(e.Message);
+            }
+        }
     }
 }

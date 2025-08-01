@@ -108,6 +108,24 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
             return dto;
         }
 
+        public async Task<GetBatchOutputHeaderResponseDTO> GetBatchOutputHeader()
+        {
+            var methodName = nameof(GetBatchOutputHeader);
+            _logger.Debug("[{ServiceName}][{MethodName}] - Start date: {Date}", _serviceName, methodName, DateTime.Now);
+            var data = await _dBContext.BatchOutPutHeaders.Where(_ => _.IsActive == true).OrderByDescending(_ => _.BatchOutPutHeaderId).FirstOrDefaultAsync();
+
+            var dataFile = data.FileName.Substring(34, 12);
+
+            var result = new GetBatchOutputHeaderResponseDTO
+            {
+                BatchOutPutHeaderId = data.BatchOutPutHeaderId,
+                FileName = data.FileName,
+                CreatedDate = data.CreatedDate,
+                Data = dataFile
+            };
+            return result;
+        }
+
         #region Function
 
         private async Task<BatchOutputDetailDTO> ParseHeaderLine(string line)
