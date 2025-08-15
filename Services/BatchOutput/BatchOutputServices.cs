@@ -316,7 +316,7 @@ namespace SMIXKTBConvenienceCheque.Services.BatchOutput
                             tmpOutPut.ChequeEffectiveDate = string.IsNullOrEmpty(detail?.ChequeEffectiveDate)
                                                   ? null
                                                   : DateTime.ParseExact(detail.ChequeEffectiveDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None);
-                            tmpOutPut.ChequeNumber = tmpOutPut?.ChequeNumber;
+                            tmpOutPut.ChequeNumber = detail?.ChequeNumber;
                             tmpOutPut.NetCheque = string.IsNullOrEmpty(detail?.NetCheque) ? 0 : Convert.ToDecimal(detail?.NetCheque);
                             tmpOutPut.PayeeName = detail?.PayeeName;
                             tmpOutPut.WithholdingTaxAmount = string.IsNullOrEmpty(detail?.WithholdingTaxAmount) ? 0 : Convert.ToDecimal(detail?.WithholdingTaxAmount);
